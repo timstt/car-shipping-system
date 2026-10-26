@@ -8,9 +8,11 @@ namespace ASTCUSA.Models
 {
     public class Order
     {
+        [Required(ErrorMessage = "Не вказано заявку")]
         [Display(Name = "№ заявки")]
         public int OrderId { get; set; }
 
+        [Required(ErrorMessage = "Вкажіть бюджет")]
         [Range(1, 10000000, ErrorMessage = "Бюджет має бути більшим за 0")]
         [Display(Name = "Максимальний бюджет, $")]
         public double MaxBudget { get; set; }

@@ -28,14 +28,31 @@ namespace ASTCUSA.Controllers
         public ActionResult Index(CarSearchFilter filter)
         {
             bool onlyAvailable = CurrentRole == UserRole.Client;
+            filter = filter ?? new CarSearchFilter();
             var model = new CarCatalogViewModel
             {
-                Filter = filter ?? new CarSearchFilter(),
-                Cars = Catalog.Search(filter, onlyAvailable),
+                Filter = filter,
+                Cars = onlyAvailable ? SearchAvailable(filter) : Catalog.Search(filter, false),
                 FavoriteIds = FavoriteIds
             };
             ViewBag.OnlyAvailable = onlyAvailable;
             return View(model);
+        }
+
+        // Каталог для клієнта (лише доступні авто): без фільтра — getAvailableCars(),
+        // лише за маркою — findCarByMake(), інакше — повний пошук за фільтром
+        private Car[] SearchAvailable(CarSearchFilter filter)
+        {
+            bool onlyMake = string.IsNullOrWhiteSpace(filter.Model) &&
+                            !filter.YearFrom.HasValue && !filter.YearTo.HasValue &&
+                            !filter.PriceFrom.HasValue && !filter.PriceTo.HasValue;
+            if (onlyMake && string.IsNullOrWhiteSpace(filter.Make))
+                return Catalog.GetAvailableCars();
+            if (onlyMake)
+                return Catalog.FindCarByMake(filter.Make)
+                              .Where(c => c.Status == CarStatus.Available)
+                              .ToArray();
+            return Catalog.Search(filter, true);
         }
 
         // GET: Cars/Details/5

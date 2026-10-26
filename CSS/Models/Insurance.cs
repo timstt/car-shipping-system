@@ -10,6 +10,7 @@ namespace ASTCUSA.Models
         [Display(Name = "Тип страховки")]
         public string Type { get; set; }
 
+        [Required(ErrorMessage = "Вкажіть ціну")]
         [Range(1, 1000000, ErrorMessage = "Ціна має бути більшою за 0")]
         [Display(Name = "Ціна, $")]
         public double Price { get; set; }

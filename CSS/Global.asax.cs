@@ -13,6 +13,11 @@ namespace ASTCUSA
             // Code First: створює БД за моделлю і заповнює її тестовими даними (Seed)
             Database.SetInitializer(new ImportInitializer());
 
+            // Українські тексти стандартних повідомлень MVC з App_GlobalResources/ValidationMessages.resx:
+            // «некоректне значення» (сервер) і «має бути числом / датою» (клієнт)
+            DefaultModelBinder.ResourceClassKey = "ValidationMessages";
+            ClientDataTypeModelValidatorProvider.ResourceClassKey = "ValidationMessages";
+
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);

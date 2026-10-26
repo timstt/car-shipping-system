@@ -62,11 +62,10 @@ namespace ASTCUSA.Controllers
         private IQueryable<Car> FreeCars(int? exceptOrderId)
         {
             int except = exceptOrderId ?? 0;
+            var inactive = Order.InactiveStatuses;
             return db.Cars.Where(c => c.Status == CarStatus.Available &&
                 !db.Orders.Any(o => o.CarId == c.CarId && o.OrderId != except &&
-                                    o.Status != OrderStatus.Cancelled &&
-                                    o.Status != OrderStatus.BidLost &&
-                                    o.Status != OrderStatus.Completed));
+                                    !inactive.Contains(o.Status)));
         }
 
         private void FillCarList(int? selectedCarId, int? exceptOrderId)

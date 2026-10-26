@@ -26,11 +26,11 @@ namespace ASTCUSA.Models
         [Display(Name = "E-mail")]
         public string Email { get; set; }
 
-        [Phone(ErrorMessage = "Некоректний номер телефону"), StringLength(30)]
+        [Phone(ErrorMessage = "Некоректний номер телефону"), StringLength(30, ErrorMessage = "Номер телефону задовгий")]
         [Display(Name = "Телефон")]
         public string PhoneNumber { get; set; }
 
-        [StringLength(200)]
+        [StringLength(200, ErrorMessage = "Адреса задовга")]
         [Display(Name = "Адреса")]
         public string Address { get; set; }
 

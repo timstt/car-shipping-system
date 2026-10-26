@@ -19,14 +19,14 @@ namespace ASTCUSA.Models
 
         // Логін користувача: унікальний, зберігається в нижньому регістрі
         [Required(ErrorMessage = "Вкажіть e-mail"), EmailAddress(ErrorMessage = "Некоректний e-mail")]
-        [StringLength(256)]
+        [StringLength(256, ErrorMessage = "E-mail задовгий")]
         [Index("IX_User_Email", IsUnique = true)]
         [Display(Name = "E-mail")]
         public string Email { get; set; }
 
         // PBKDF2-хеш пароля разом із сіллю (див. PasswordHasher). Сам пароль не зберігається.
-        [Required]
-        [StringLength(256)]
+        [Required(ErrorMessage = "Не задано пароль")]
+        [StringLength(256, ErrorMessage = "Хеш пароля задовгий")]
         public string PasswordHash { get; set; }
 
         [NotMapped]

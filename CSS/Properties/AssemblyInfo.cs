@@ -1,10 +1,7 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-// Управление общими сведениями о сборке осуществляется следующим образом
-// набора атрибутов. Измените значения этих атрибутов для изменения сведений,
-// связанных с этой сборкой.
+// Загальні відомості про збірку задаються такими атрибутами.
 [assembly: AssemblyTitle("ASTCUSA")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
@@ -14,22 +11,12 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-// Установка значения False в параметре ComVisible делает типы в этой сборке невидимыми
-// для компонентов COM.  Если требуется обратиться к типу в этой сборке через
-// COM, задайте атрибуту ComVisible значение true для требуемого типа.
+// ComVisible = false: типи цієї збірки не видимі для COM-компонентів.
 [assembly: ComVisible(false)]
 
-// Следующий GUID служит для идентификации (ID) библиотеки типов typelib, если этот проект видим для COM
+// GUID бібліотеки типів, якщо проєкт стане видимим для COM
 [assembly: Guid("c63d2075-c4ea-48e5-a69d-a7f11bb99b0e")]
 
-// Сведения о версии сборки состоят из указанных ниже четырех значений:
-//
-//      Основной номер версии
-//      Дополнительный номер версии
-//      Номер сборки
-//      Редакция
-//
-// Можно задать все значения или принять номер редакции и номер сборки по умолчанию,
-// используя "*", как показано ниже:
+// Версія збірки: основний номер, додатковий номер, номер збірки, редакція.
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]

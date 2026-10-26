@@ -5,6 +5,7 @@ namespace ASTCUSA.Models
 {
     public class Car
     {
+        [Required(ErrorMessage = "Не вказано авто")]
         public int CarId { get; set; }
 
         [Required(ErrorMessage = "Вкажіть VIN-код")]
@@ -20,10 +21,12 @@ namespace ASTCUSA.Models
         [Display(Name = "Модель")]
         public string Model { get; set; }
 
+        [Required(ErrorMessage = "Вкажіть рік")]
         [Range(1950, 2100, ErrorMessage = "Некоректний рік")]
         [Display(Name = "Рік")]
         public int Year { get; set; }
 
+        [Required(ErrorMessage = "Вкажіть ціну")]
         [Range(1, 10000000, ErrorMessage = "Ціна має бути більшою за 0")]
         [Display(Name = "Ціна на аукціоні, $")]
         public double AuctionPrice { get; set; }
