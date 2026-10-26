@@ -7,3 +7,4 @@ packages/
 App_Data/*.mdf
 App_Data/*.ldf
 *.pdf
+docs/diagram-changes.md
