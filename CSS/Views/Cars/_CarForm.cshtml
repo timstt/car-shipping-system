@@ -1,0 +1,30 @@
+﻿@model Car
+
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+<div class="row g-3">
+    <div class="col-md-6">
+        @Html.LabelFor(m => m.VinCode, new { @class = "form-label" })
+        @Html.TextBoxFor(m => m.VinCode, new { @class = "form-control", maxlength = "17" })
+        @Html.ValidationMessageFor(m => m.VinCode, "", new { @class = "text-danger small" })
+    </div>
+    <div class="col-md-3">
+        @Html.LabelFor(m => m.Make, new { @class = "form-label" })
+        @Html.TextBoxFor(m => m.Make, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Make, "", new { @class = "text-danger small" })
+    </div>
+    <div class="col-md-3">
+        @Html.LabelFor(m => m.Model, new { @class = "form-label" })
+        @Html.TextBoxFor(m => m.Model, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Model, "", new { @class = "text-danger small" })
+    </div>
+    <div class="col-md-3">
+        @Html.LabelFor(m => m.Year, new { @class = "form-label" })
+        @Html.TextBoxFor(m => m.Year, new { @class = "form-control", type = "number", min = "1950", max = "2100" })
+        @Html.ValidationMessageFor(m => m.Year, "", new { @class = "text-danger small" })
+    </div>
+    <div class="col-md-3">
+        @Html.LabelFor(m => m.AuctionPrice, new { @class = "form-label" })
+        @Html.TextBoxFor(m => m.AuctionPrice, new { @class = "form-control", type = "number", min = "1", step = "0.01" })
+        @Html.ValidationMessageFor(m => m.AuctionPrice, "", new { @class = "text-danger small" })
+    </div>
+</div>

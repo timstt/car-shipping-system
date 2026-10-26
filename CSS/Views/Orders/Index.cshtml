@@ -1,0 +1,72 @@
+﻿@model IEnumerable<Order>
+@{
+    var role = (UserRole)ViewBag.CurrentRole;
+    OrderStatus? selected = ViewBag.Status;
+    ViewBag.Title = role == UserRole.Client ? "Мої заявки" : role == UserRole.Logistician ? "Доставки" : "Заявки";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">@ViewBag.Title</h1>
+    @if (role == UserRole.Client)
+    {
+        @Html.ActionLink("+ Нова заявка", "Create", null, new { @class = "btn btn-success" })
+    }
+</div>
+
+@using (Html.BeginForm("Index", "Orders", FormMethod.Get, new { @class = "row g-2 align-items-end mb-3" }))
+{
+    <div class="col-auto">
+        <label class="form-label small" for="status">Статус</label>
+        <select class="form-select" id="status" name="status">
+            <option value="">Усі</option>
+            @foreach (OrderStatus s in Enum.GetValues(typeof(OrderStatus)))
+            {
+                <option value="@s" selected="@(selected == s)">@s.GetDisplayName()</option>
+            }
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-primary">Фільтрувати</button>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-secondary">Заявок немає.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>№</th>
+                    <th>Створено</th>
+                    @if (role != UserRole.Client) { <th>Клієнт</th> }
+                    <th>Авто</th>
+                    <th class="text-end">Бюджет, $</th>
+                    <th class="text-end">Фінальна ціна, $</th>
+                    <th>Статус</th>
+                    <th>Менеджер</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var o in Model)
+                {
+                    <tr>
+                        <td>@o.OrderId</td>
+                        <td>@o.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                        @if (role != UserRole.Client) { <td>@(o.Client != null ? o.Client.Name : "—")</td> }
+                        <td>@(o.Car != null ? o.Car.Make + " " + o.Car.Model + " (" + o.Car.Year + ")" : "—")</td>
+                        <td class="text-end">@o.MaxBudget.ToString("N0")</td>
+                        <td class="text-end">@(o.FinalPrice.HasValue ? o.FinalPrice.Value.ToString("N0") : "—")</td>
+                        <td><span class="badge @o.Status.BadgeClass()">@o.Status.GetDisplayName()</span></td>
+                        <td>@(o.Manager != null ? o.Manager.Name : "—")</td>
+                        <td class="text-end">@Html.ActionLink("Відкрити", "Details", new { id = o.OrderId }, new { @class = "btn btn-sm btn-outline-primary" })</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

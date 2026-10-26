@@ -1,0 +1,42 @@
+﻿@model Order
+@{
+    ViewBag.Title = "Змінити заявку №" + Model.OrderId;
+}
+
+<h1 class="h3 mb-3">Змінити заявку №@Model.OrderId</h1>
+<p>Статус: <span class="badge @Model.Status.BadgeClass()">@Model.Status.GetDisplayName()</span></p>
+@if (Model.Status == OrderStatus.BidLost)
+{
+    <div class="alert alert-info">Після збереження заявка знову потрапить до менеджера зі статусом «Нова».</div>
+}
+
+@using (Html.BeginForm("Edit", "Orders", FormMethod.Post, new { @class = "card card-body" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.OrderId)
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    <div class="row g-3">
+        <div class="col-md-8">
+            @Html.LabelFor(m => m.CarId, new { @class = "form-label" })
+            @Html.DropDownList("CarId", null, "— оберіть авто —", new { @class = "form-select" })
+            @Html.ValidationMessageFor(m => m.CarId, "", new { @class = "text-danger small" })
+            @if (Model.Car != null && Model.Car.Status != CarStatus.Available)
+            {
+                <div class="form-text text-danger">Поточне авто (@Model.Car.Make @Model.Car.Model) вже недоступне — оберіть інше.</div>
+            }
+        </div>
+        <div class="col-md-4">
+            @Html.LabelFor(m => m.MaxBudget, new { @class = "form-label" })
+            @Html.TextBoxFor(m => m.MaxBudget, new { @class = "form-control", type = "number", min = "1", step = "100" })
+            @Html.ValidationMessageFor(m => m.MaxBudget, "", new { @class = "text-danger small" })
+        </div>
+    </div>
+    <div class="mt-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Зберегти</button>
+        @Html.ActionLink("Скасувати", "Details", new { id = Model.OrderId }, new { @class = "btn btn-outline-secondary" })
+    </div>
+}
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

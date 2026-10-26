@@ -1,0 +1,39 @@
+﻿@model Order
+@{
+    ViewBag.Title = "Доручення — заявка №" + Model.OrderId;
+    var d = Model.Delivery;
+}
+
+<div class="d-flex gap-2 mb-3 d-print-none">
+    @Html.ActionLink("← До заявки", "Details", new { id = Model.OrderId }, new { @class = "btn btn-outline-secondary" })
+    <button type="button" class="btn btn-primary" onclick="window.print()">Друкувати</button>
+</div>
+
+<div class="border p-4 bg-white">
+    <h1 class="h4 text-center mb-1">ДОРУЧЕННЯ № @Model.OrderId/@d.MandateGeneratedAt.Value.ToString("yyMMdd")</h1>
+    <p class="text-center mb-4">на перевезення транспортного засобу</p>
+    <p class="text-end">Дата: @d.MandateGeneratedAt.Value.ToString("dd.MM.yyyy")</p>
+
+    <p>
+        Цим дорученням <strong>@Model.Client.Name</strong> (тел. @Model.Client.PhoneNumber, адреса: @Model.Client.Address)
+        доручає компанії-перевізнику, в особі логіста <strong>@(d.Logistician != null ? d.Logistician.Name : "—")</strong>,
+        здійснити перевезення та митне оформлення транспортного засобу:
+    </p>
+
+    <table class="table table-bordered">
+        <tbody>
+            <tr><th style="width:35%">Марка, модель</th><td>@Model.Car.Make @Model.Car.Model</td></tr>
+            <tr><th>Рік випуску</th><td>@Model.Car.Year</td></tr>
+            <tr><th>VIN-код</th><td>@Model.Car.VinCode</td></tr>
+            <tr><th>Вартість (за інвойсом)</th><td>$@((Model.FinalPrice ?? 0).ToString("N2"))</td></tr>
+            <tr><th>Трек-номер</th><td>@d.TrackingNumber</td></tr>
+            <tr><th>Страхування вантажу</th><td>@(d.HasCargoInsurance ? "так, $" + d.CargoInsuranceCost.ToString("N2") : "ні")</td></tr>
+            <tr><th>Відповідальний менеджер</th><td>@(Model.Manager != null ? Model.Manager.Name : "—")</td></tr>
+        </tbody>
+    </table>
+
+    <div class="row mt-5">
+        <div class="col-6">Довіритель: ____________________ / @Model.Client.Name /</div>
+        <div class="col-6 text-end">Логіст: ____________________ / @(d.Logistician != null ? d.Logistician.Name : "") /</div>
+    </div>
+</div>

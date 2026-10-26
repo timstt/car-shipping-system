@@ -1,0 +1,41 @@
+﻿@model Order
+@{
+    ViewBag.Title = "Нова заявка";
+    var cars = (SelectList)ViewBag.CarId;
+}
+
+<h1 class="h3 mb-3">Створити заявку на підбір авто</h1>
+
+@if (!cars.Any())
+{
+    <div class="alert alert-warning">Зараз немає доступних авто. @Html.ActionLink("Перейти до каталогу", "Index", "Cars")</div>
+}
+else
+{
+    using (Html.BeginForm("Create", "Orders", FormMethod.Post, new { @class = "card card-body" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="row g-3">
+            <div class="col-md-8">
+                @Html.LabelFor(m => m.CarId, new { @class = "form-label" })
+                @Html.DropDownList("CarId", null, "— оберіть авто —", new { @class = "form-select" })
+                @Html.ValidationMessageFor(m => m.CarId, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-4">
+                @Html.LabelFor(m => m.MaxBudget, new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.MaxBudget, new { @class = "form-control", type = "number", min = "1", step = "100" })
+                @Html.ValidationMessageFor(m => m.MaxBudget, "", new { @class = "text-danger small" })
+            </div>
+        </div>
+        <p class="text-muted small mt-3 mb-0">Страховий пакет можна додати після створення заявки.</p>
+        <div class="mt-3 d-flex gap-2">
+            <button type="submit" class="btn btn-success">Створити заявку</button>
+            @Html.ActionLink("Скасувати", "Index", null, new { @class = "btn btn-outline-secondary" })
+        </div>
+    }
+}
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

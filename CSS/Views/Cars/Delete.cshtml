@@ -1,0 +1,32 @@
+﻿@model Car
+@{
+    ViewBag.Title = "Видалити авто";
+    int ordersCount = ViewBag.OrdersCount;
+}
+
+<h1 class="h3 mb-3">Видалити авто?</h1>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <p class="mb-0">@Model.GetDetails()</p>
+    </div>
+</div>
+
+@if (ordersCount > 0)
+{
+    <div class="alert alert-warning">
+        Це авто не можна видалити: з ним пов'язано заявок — @ordersCount.
+    </div>
+    @Html.ActionLink("← Назад", "Details", new { id = Model.CarId }, new { @class = "btn btn-outline-secondary" })
+}
+else
+{
+    using (Html.BeginForm("Delete", "Cars", new { id = Model.CarId }, FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-danger">Видалити</button>
+            @Html.ActionLink("Скасувати", "Details", new { id = Model.CarId }, new { @class = "btn btn-outline-secondary" })
+        </div>
+    }
+}

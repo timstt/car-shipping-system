@@ -1,0 +1,308 @@
+﻿@model Order
+@{
+    ViewBag.Title = "Заявка №" + Model.OrderId;
+    var role = (UserRole)ViewBag.CurrentRole;
+    var s = Model.Status;
+    var d = Model.Delivery;
+    var invoice = Model.Invoice;
+    bool beforePayment = s != OrderStatus.Paid && s != OrderStatus.Shipping && s != OrderStatus.Completed && s != OrderStatus.Cancelled;
+    bool clientCanEdit = s == OrderStatus.New || s == OrderStatus.DocumentsRequested || s == OrderStatus.DocumentsProvided || s == OrderStatus.BidLost;
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Заявка №@Model.OrderId <span class="badge @s.BadgeClass() align-middle fs-6">@s.GetDisplayName()</span></h1>
+    @Html.ActionLink("← До списку", "Index", null, new { @class = "btn btn-outline-secondary" })
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        @* ---------- Основні дані ---------- *@
+        <div class="card mb-3">
+            <div class="card-header fw-semibold">Заявка</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Клієнт</dt>
+                    <dd class="col-sm-8">@Model.Client.Name, @Model.Client.PhoneNumber</dd>
+                    <dt class="col-sm-4">Менеджер</dt>
+                    <dd class="col-sm-8">@(Model.Manager != null ? Model.Manager.Name : "ще не призначено")</dd>
+                    <dt class="col-sm-4">Створено</dt>
+                    <dd class="col-sm-8">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</dd>
+                    <dt class="col-sm-4">Авто</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.Car != null)
+                        {
+                            @Html.ActionLink(Model.Car.GetDetails(), "Details", "Cars", new { id = Model.Car.CarId }, null)
+                            <span class="badge @Model.Car.Status.BadgeClass() ms-1">@Model.Car.Status.GetDisplayName()</span>
+                        }
+                        else
+                        {
+                            <span>—</span>
+                        }
+                    </dd>
+                    <dt class="col-sm-4">@Html.DisplayNameFor(m => m.MaxBudget)</dt>
+                    <dd class="col-sm-8">@Model.MaxBudget.ToString("N0")</dd>
+                    <dt class="col-sm-4">@Html.DisplayNameFor(m => m.FinalPrice)</dt>
+                    <dd class="col-sm-8">@(Model.FinalPrice.HasValue ? Model.FinalPrice.Value.ToString("N0") : "—")</dd>
+                    <dt class="col-sm-4">Отримання підтверджено</dt>
+                    <dd class="col-sm-8">@(Model.IsConfirmedByClient ? "так" : "ні")</dd>
+                    @if (!string.IsNullOrEmpty(Model.Review))
+                    {
+                        <dt class="col-sm-4">Відгук</dt>
+                        <dd class="col-sm-8"><em>«@(Model.Review)»</em></dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        @* ---------- Страховки ---------- *@
+        <div class="card mb-3">
+            <div class="card-header fw-semibold">Страхові пакети</div>
+            <ul class="list-group list-group-flush">
+                @if (Model.Insurances == null || !Model.Insurances.Any())
+                {
+                    <li class="list-group-item text-muted">Немає</li>
+                }
+                else
+                {
+                    foreach (var ins in Model.Insurances)
+                    {
+                        <li class="list-group-item">@ins.GetCoverageDetails()</li>
+                    }
+                }
+            </ul>
+        </div>
+
+        @* ---------- Інвойс ---------- *@
+        @if (invoice != null)
+        {
+            <div class="card mb-3">
+                <div class="card-header fw-semibold">Інвойс №@invoice.InvoiceId</div>
+                <div class="card-body">
+                    Сума: <strong>$@invoice.TotalAmount.ToString("N0")</strong> —
+                    @if (invoice.CheckPaymentStatus())
+                    {
+                        <span class="badge bg-success">оплачено</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark">не оплачено</span>
+                    }
+                </div>
+            </div>
+        }
+
+        @* ---------- Доставка ---------- *@
+        @if (d != null)
+        {
+            <div class="card mb-3">
+                <div class="card-header fw-semibold">Доставка</div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Трек-номер</dt>
+                        <dd class="col-sm-8"><code>@d.TrackingNumber</code></dd>
+                        <dt class="col-sm-4">Логіст</dt>
+                        <dd class="col-sm-8">@(d.Logistician != null ? d.Logistician.Name : "—")</dd>
+                        <dt class="col-sm-4">Поточне місце</dt>
+                        <dd class="col-sm-8">@d.CurrentLocation</dd>
+                        <dt class="col-sm-4">Статус доставки</dt>
+                        <dd class="col-sm-8">@d.Status</dd>
+                        <dt class="col-sm-4">Митниця</dt>
+                        <dd class="col-sm-8">@(d.IsCustomsCleared ? "пройдено" : "не пройдено")</dd>
+                        <dt class="col-sm-4">Страхування вантажу</dt>
+                        <dd class="col-sm-8">@(d.HasCargoInsurance ? "$" + d.CargoInsuranceCost.ToString("N0") : "немає")</dd>
+                        <dt class="col-sm-4">Фотозвіт</dt>
+                        <dd class="col-sm-8">@(string.IsNullOrEmpty(d.PhotoReportNote) ? "—" : d.PhotoReportNote)</dd>
+                        <dt class="col-sm-4">Доручення</dt>
+                        <dd class="col-sm-8">
+                            @if (d.MandateGeneratedAt.HasValue)
+                            {
+                                @Html.ActionLink("від " + d.MandateGeneratedAt.Value.ToString("dd.MM.yyyy"), "Mandate", new { id = Model.OrderId })
+                            }
+                            else
+                            {
+                                <span>не сформовано</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        }
+    </div>
+
+    @* ---------- Дії за роллю ---------- *@
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header fw-semibold">Дії</div>
+            <div class="card-body d-grid gap-2">
+                @if (role == UserRole.Client)
+                {
+                    if (s == OrderStatus.DocumentsRequested)
+                    {
+                        <div class="alert alert-warning small mb-0">Менеджер запитав додаткові документи.</div>
+                        using (Html.BeginForm("ProvideDocuments", "Orders", new { id = Model.OrderId }, FormMethod.Post, new { @class = "d-grid" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-warning">Надати документи</button>
+                        }
+                    }
+                    if (s == OrderStatus.BidLost)
+                    {
+                        <div class="alert alert-danger small mb-0">Ставку програно. Продовжити пошук?</div>
+                    }
+                    if (clientCanEdit)
+                    {
+                        @Html.ActionLink(s == OrderStatus.BidLost ? "Так: вибрати інше авто або змінити бюджет" : "Змінити авто / бюджет",
+                            "Edit", new { id = Model.OrderId }, new { @class = "btn btn-outline-primary" })
+                    }
+                    if (beforePayment)
+                    {
+                        @Html.ActionLink("Додати страховий пакет", "AddInsurance", new { id = Model.OrderId }, new { @class = "btn btn-outline-secondary" })
+                    }
+                    if (s == OrderStatus.Invoiced)
+                    {
+                        using (Html.BeginForm("PayInvoice", "Orders", new { id = Model.OrderId }, FormMethod.Post, new { @class = "d-grid" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-success">Оплатити інвойс</button>
+                        }
+                    }
+                    if (s == OrderStatus.PaymentPending)
+                    {
+                        <div class="alert alert-info small mb-0">Оплату надіслано, очікуємо підтвердження менеджером.</div>
+                    }
+                    if (d != null)
+                    {
+                        @Html.ActionLink("Відстежити доставку", "TrackDelivery", new { id = Model.OrderId }, new { @class = "btn btn-outline-primary" })
+                    }
+                    if (Model.Car != null && Model.Car.Status == CarStatus.ReadyForPickup && !Model.IsConfirmedByClient)
+                    {
+                        using (Html.BeginForm("ConfirmReceipt", "Orders", new { id = Model.OrderId }, FormMethod.Post, new { @class = "d-grid" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-success">Підтвердити отримання авто</button>
+                        }
+                    }
+                    if (Model.IsConfirmedByClient && string.IsNullOrEmpty(Model.Review))
+                    {
+                        using (Html.BeginForm("LeaveReview", "Orders", new { id = Model.OrderId }, FormMethod.Post))
+                        {
+                            @Html.AntiForgeryToken()
+                            <label class="form-label small" for="review">Залишити відгук</label>
+                            <textarea class="form-control mb-2" id="review" name="review" rows="3" required></textarea>
+                            <button type="submit" class="btn btn-outline-success w-100">Надіслати відгук</button>
+                        }
+                    }
+                    if (clientCanEdit || s == OrderStatus.InProgress)
+                    {
+                        using (Html.BeginForm("Cancel", "Orders", new { id = Model.OrderId }, FormMethod.Post, new { @class = "d-grid", onsubmit = "return confirm('Скасувати заявку?');" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-outline-danger">Скасувати заявку</button>
+                        }
+                    }
+                }
+                else if (role == UserRole.Manager)
+                {
+                    if (s == OrderStatus.New || s == OrderStatus.DocumentsProvided)
+                    {
+                        using (Html.BeginForm("ProcessOrder", "Orders", new { id = Model.OrderId }, FormMethod.Post, new { @class = "d-grid" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-primary">Обробити заявку (взяти в роботу)</button>
+                        }
+                    }
+                    if (s == OrderStatus.InProgress)
+                    {
+                        @Html.ActionLink("Взяти участь в аукціоні", "PlaceBid", new { id = Model.OrderId }, new { @class = "btn btn-primary" })
+                        using (Html.BeginForm("RequestDocuments", "Orders", new { id = Model.OrderId }, FormMethod.Post, new { @class = "d-grid" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-outline-warning">Запитати додаткові документи</button>
+                        }
+                    }
+                    if (s == OrderStatus.BidWon && invoice == null)
+                    {
+                        using (Html.BeginForm("CreateInvoice", "Orders", new { id = Model.OrderId }, FormMethod.Post, new { @class = "d-grid" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-success">Ініціювати формування інвойсу</button>
+                        }
+                    }
+                    if (s == OrderStatus.PaymentPending)
+                    {
+                        using (Html.BeginForm("ConfirmPayment", "Orders", new { id = Model.OrderId }, FormMethod.Post, new { @class = "d-grid" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-success">Зафіксувати оплату</button>
+                        }
+                        using (Html.BeginForm("RejectPayment", "Orders", new { id = Model.OrderId }, FormMethod.Post, new { @class = "d-grid" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-outline-danger">Оплата не надійшла</button>
+                        }
+                    }
+                    if (s == OrderStatus.New || s == OrderStatus.Cancelled || s == OrderStatus.BidLost)
+                    {
+                        @Html.ActionLink("Видалити заявку", "Delete", new { id = Model.OrderId }, new { @class = "btn btn-outline-danger" })
+                    }
+                    if (d != null)
+                    {
+                        @Html.ActionLink("Відстежити доставку", "TrackDelivery", new { id = Model.OrderId }, new { @class = "btn btn-outline-primary" })
+                    }
+                }
+                else if (role == UserRole.Logistician)
+                {
+                    if (s == OrderStatus.Paid && d == null)
+                    {
+                        using (Html.BeginForm("CreateDelivery", "Orders", new { id = Model.OrderId }, FormMethod.Post, new { @class = "d-grid" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-primary">Призначити перевізника по США</button>
+                        }
+                    }
+                    if (d != null && s != OrderStatus.Completed)
+                    {
+                        using (Html.BeginForm("GenerateMandate", "Orders", new { id = Model.OrderId }, FormMethod.Post, new { @class = "d-grid" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-outline-primary">@(d.MandateGeneratedAt.HasValue ? "Оновити доручення" : "Згенерувати доручення")</button>
+                        }
+                        @Html.ActionLink(d.HasCargoInsurance ? "Змінити страхування вантажу" : "Замовити страхування вантажу",
+                            "AddCargoInsurance", new { id = Model.OrderId }, new { @class = "btn btn-outline-secondary" })
+                        @Html.ActionLink("Додати фотозвіт стану авто", "AddPhotoReport", new { id = Model.OrderId }, new { @class = "btn btn-outline-secondary" })
+                    }
+                    if (d != null && !d.IsCustomsCleared)
+                    {
+                        using (Html.BeginForm("ClearCustoms", "Orders", new { id = Model.OrderId }, FormMethod.Post, new { @class = "d-grid" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-warning">Оформити митні документи</button>
+                        }
+                    }
+                    if (s == OrderStatus.Shipping && Model.Car != null && Model.Car.Status == CarStatus.InTransit)
+                    {
+                        using (Html.BeginForm("UpdateDeliveryStatus", "Orders", new { id = Model.OrderId }, FormMethod.Post))
+                        {
+                            @Html.AntiForgeryToken()
+                            <label class="form-label small" for="location">Оновити статус доставки</label>
+                            <input type="text" class="form-control mb-2" id="location" name="location" placeholder="Поточне місце, напр. «Порт Одеса»" />
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="arrived" name="arrived" value="true" />
+                                <label class="form-check-label" for="arrived">Авто прибуло (готове до видачі)</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Оновити</button>
+                        }
+                    }
+                }
+                @if (s == OrderStatus.Completed)
+                {
+                    <div class="alert alert-success small mb-0">Заявку завершено.</div>
+                }
+                else if (s == OrderStatus.Cancelled)
+                {
+                    <div class="alert alert-secondary small mb-0">Заявку скасовано.</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

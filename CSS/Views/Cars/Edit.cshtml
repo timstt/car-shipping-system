@@ -1,0 +1,23 @@
+﻿@model Car
+@{
+    ViewBag.Title = "Редагувати авто";
+}
+
+<h1 class="h3 mb-3">Редагувати авто</h1>
+<p>Поточний статус: <span class="badge @Model.Status.BadgeClass()">@Model.Status.GetDisplayName()</span>
+    <small class="text-muted">(змінюється автоматично під час аукціону, оплати й доставки)</small></p>
+
+@using (Html.BeginForm("Edit", "Cars", FormMethod.Post, new { @class = "card card-body" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.CarId)
+    @Html.Partial("_CarForm", Model)
+    <div class="mt-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Зберегти</button>
+        @Html.ActionLink("Скасувати", "Details", new { id = Model.CarId }, new { @class = "btn btn-outline-secondary" })
+    </div>
+}
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

@@ -1,0 +1,57 @@
+﻿@model Order
+@{
+    ViewBag.Title = "Відстеження доставки";
+    var d = Model.Delivery;
+    var steps = new[]
+    {
+        new { Title = "Перевізника призначено", Done = true },
+        new { Title = "Митницю пройдено", Done = d.IsCustomsCleared },
+        new { Title = "Готово до видачі", Done = Model.Car != null && (Model.Car.Status == CarStatus.ReadyForPickup || Model.Car.Status == CarStatus.Delivered) },
+        new { Title = "Отримано клієнтом", Done = Model.IsConfirmedByClient }
+    };
+}
+
+<h1 class="h3 mb-3">Відстеження доставки — заявка №@Model.OrderId</h1>
+
+@if (ViewBag.TrackingInfo != null)
+{
+    <div class="alert alert-info">@ViewBag.TrackingInfo</div>
+}
+
+<div class="card mb-3">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-4">Трек-номер</dt>
+            <dd class="col-sm-8"><code>@d.TrackingNumber</code></dd>
+            <dt class="col-sm-4">Авто</dt>
+            <dd class="col-sm-8">@(Model.Car != null ? Model.Car.GetDetails() : "—")</dd>
+            <dt class="col-sm-4">Поточне місце</dt>
+            <dd class="col-sm-8">@d.CurrentLocation</dd>
+            <dt class="col-sm-4">Статус</dt>
+            <dd class="col-sm-8">@d.Status</dd>
+            <dt class="col-sm-4">Митний статус</dt>
+            <dd class="col-sm-8">
+                @if (d.IsCustomsCleared)
+                {
+                    <span class="badge bg-success">митницю пройдено</span>
+                }
+                else
+                {
+                    <span class="badge bg-warning text-dark">очікує оформлення</span>
+                }
+            </dd>
+        </dl>
+    </div>
+</div>
+
+<ul class="list-group mb-3">
+    @foreach (var step in steps)
+    {
+        <li class="list-group-item d-flex justify-content-between">
+            <span>@step.Title</span>
+            <span>@(step.Done ? "✔" : "…")</span>
+        </li>
+    }
+</ul>
+
+@Html.ActionLink("← До заявки", "Details", new { id = Model.OrderId }, new { @class = "btn btn-outline-secondary" })

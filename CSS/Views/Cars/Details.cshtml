@@ -1,0 +1,56 @@
+﻿@model Car
+@{
+    ViewBag.Title = Model.Make + " " + Model.Model;
+    var role = (UserRole)ViewBag.CurrentRole;
+    bool isFavorite = ViewBag.IsFavorite;
+}
+
+<h1 class="h3">@Model.Make @Model.Model <small class="text-muted">@Model.Year</small></h1>
+<p><span class="badge @Model.Status.BadgeClass()">@Model.Status.GetDisplayName()</span></p>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.VinCode)</dt>
+            <dd class="col-sm-9"><code>@Model.VinCode</code></dd>
+            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.AuctionPrice)</dt>
+            <dd class="col-sm-9">@Model.AuctionPrice.ToString("N0")</dd>
+            <dt class="col-sm-3">Опис</dt>
+            <dd class="col-sm-9">@Model.GetDetails()</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="d-flex flex-wrap gap-2">
+    @Html.ActionLink("← До каталогу", "Index", null, new { @class = "btn btn-outline-secondary" })
+    @if (role == UserRole.Client)
+    {
+        if (Model.Status == CarStatus.Available)
+        {
+            @Html.ActionLink("Створити заявку на це авто", "Create", "Orders", new { carId = Model.CarId }, new { @class = "btn btn-success" })
+        }
+        if (isFavorite)
+        {
+            using (Html.BeginForm("RemoveFromFavorites", "Cars", new { id = Model.CarId }, FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.Hidden("returnUrl", Request.RawUrl)
+                <button type="submit" class="btn btn-outline-warning">Прибрати з обраного</button>
+            }
+        }
+        else
+        {
+            using (Html.BeginForm("AddToFavorites", "Cars", new { id = Model.CarId }, FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.Hidden("returnUrl", Request.RawUrl)
+                <button type="submit" class="btn btn-outline-warning">☆ Додати в обране</button>
+            }
+        }
+    }
+    else if (role == UserRole.Manager)
+    {
+        @Html.ActionLink("Редагувати", "Edit", new { id = Model.CarId }, new { @class = "btn btn-primary" })
+        @Html.ActionLink("Видалити", "Delete", new { id = Model.CarId }, new { @class = "btn btn-outline-danger" })
+    }
+</div>

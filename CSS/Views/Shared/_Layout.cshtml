@@ -1,0 +1,86 @@
+﻿@{
+    // Поточний користувач — з авторизаційного тікета (User.Identity)
+    var role = User.Identity.GetUserRole();
+    string userName = User.Identity.GetDisplayName();
+    string controller = ViewContext.RouteData.Values["controller"] as string;
+    Func<string, string> active = c => string.Equals(controller, c, StringComparison.OrdinalIgnoreCase) ? " active" : "";
+}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title — Авто зі США</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark d-print-none">
+        <div class="container">
+            @Html.ActionLink("Авто зі США", "Index", "Home", null, new { @class = "navbar-brand" })
+            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                    aria-controls="mainNav" aria-expanded="false" aria-label="Меню">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav me-auto">
+                    @if (role != UserRole.None)
+                    {
+                        <li class="nav-item">@Html.ActionLink("Каталог авто", "Index", "Cars", null, new { @class = "nav-link" + active("Cars") })</li>
+                        if (role == UserRole.Client)
+                        {
+                            <li class="nav-item">@Html.ActionLink("Обране", "Favorites", "Cars", null, new { @class = "nav-link" })</li>
+                            <li class="nav-item">@Html.ActionLink("Мої заявки", "Index", "Orders", null, new { @class = "nav-link" + active("Orders") })</li>
+                            <li class="nav-item">@Html.ActionLink("Нова заявка", "Create", "Orders", null, new { @class = "nav-link" })</li>
+                        }
+                        else if (role == UserRole.Manager)
+                        {
+                            <li class="nav-item">@Html.ActionLink("Заявки", "Index", "Orders", null, new { @class = "nav-link" + active("Orders") })</li>
+                            <li class="nav-item">@Html.ActionLink("Звітність", "Index", "Reports", null, new { @class = "nav-link" + active("Reports") })</li>
+                        }
+                        else if (role == UserRole.Logistician)
+                        {
+                            <li class="nav-item">@Html.ActionLink("Доставки", "Index", "Orders", null, new { @class = "nav-link" + active("Orders") })</li>
+                        }
+                    }
+                </ul>
+                @if (role != UserRole.None)
+                {
+                    <span class="navbar-text me-3">@userName <span class="badge bg-secondary">@role.GetDisplayName()</span></span>
+                    using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { @class = "d-flex" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-light btn-sm">Вийти</button>
+                    }
+                }
+                else
+                {
+                    <ul class="navbar-nav">
+                        <li class="nav-item">@Html.ActionLink("Увійти", "Login", "Account", null, new { @class = "nav-link" })</li>
+                        <li class="nav-item">@Html.ActionLink("Реєстрація", "Register", "Account", null, new { @class = "nav-link" })</li>
+                    </ul>
+                }
+            </div>
+        </div>
+    </nav>
+
+    <div class="container body-content py-4">
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-info alert-dismissible fade show d-print-none" role="alert">
+                @TempData["Message"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрити"></button>
+            </div>
+        }
+        @RenderBody()
+        <hr class="d-print-none" />
+        <footer class="text-muted small d-print-none">
+            <p>&copy; @DateTime.Now.Year — Система перевезення авто зі США (ASP.NET MVC, Entity Framework Code First)</p>
+        </footer>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+</body>
+</html>

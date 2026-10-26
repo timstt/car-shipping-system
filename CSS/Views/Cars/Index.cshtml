@@ -1,0 +1,127 @@
+﻿@model CarCatalogViewModel
+@{
+    ViewBag.Title = "Каталог авто";
+    var role = (UserRole)ViewBag.CurrentRole;
+    bool onlyAvailable = ViewBag.OnlyAvailable;
+    var f = Model.Filter;
+    string returnUrl = Request.RawUrl;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Каталог авто</h1>
+    @if (role == UserRole.Manager)
+    {
+        @Html.ActionLink("+ Додати авто", "Create", null, new { @class = "btn btn-success" })
+    }
+</div>
+
+@* «Шукати за фільтром» — GET, бо це лише читання даних *@
+@using (Html.BeginForm("Index", "Cars", FormMethod.Get, new { @class = "card card-body mb-4" }))
+{
+    <div class="row g-2 align-items-end">
+        <div class="col-md-2">
+            <label class="form-label small" for="Make">Марка</label>
+            <input type="text" class="form-control" id="Make" name="Make" value="@f.Make" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small" for="Model">Модель</label>
+            <input type="text" class="form-control" id="Model" name="Model" value="@f.Model" />
+        </div>
+        <div class="col-md-1">
+            <label class="form-label small" for="YearFrom">Рік від</label>
+            <input type="number" class="form-control" id="YearFrom" name="YearFrom" value="@f.YearFrom" min="1950" max="2100" />
+        </div>
+        <div class="col-md-1">
+            <label class="form-label small" for="YearTo">Рік до</label>
+            <input type="number" class="form-control" id="YearTo" name="YearTo" value="@f.YearTo" min="1950" max="2100" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small" for="PriceFrom">Ціна від, $</label>
+            <input type="number" class="form-control" id="PriceFrom" name="PriceFrom" value="@f.PriceFrom" min="0" step="100" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small" for="PriceTo">Ціна до, $</label>
+            <input type="number" class="form-control" id="PriceTo" name="PriceTo" value="@f.PriceTo" min="0" step="100" />
+        </div>
+        @if (!onlyAvailable)
+        {
+            <div class="col-md-2">
+                <label class="form-label small" for="Status">Статус</label>
+                <select class="form-select" id="Status" name="Status">
+                    <option value="">Усі</option>
+                    @foreach (CarStatus s in Enum.GetValues(typeof(CarStatus)))
+                    {
+                        <option value="@s" selected="@(f.Status == s)">@s.GetDisplayName()</option>
+                    }
+                </select>
+            </div>
+        }
+        <div class="col-md-12 d-flex gap-2 mt-2">
+            <button type="submit" class="btn btn-primary">Знайти</button>
+            @Html.ActionLink("Скинути", "Index", null, new { @class = "btn btn-outline-secondary" })
+        </div>
+    </div>
+}
+
+@if (onlyAvailable)
+{
+    <p class="text-muted small">Показано лише доступні для заявки авто.</p>
+}
+
+@if (!Model.Cars.Any())
+{
+    <div class="alert alert-secondary">За вашим запитом авто не знайдено.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Марка / модель</th>
+                    <th>Рік</th>
+                    <th>VIN-код</th>
+                    <th class="text-end">Ціна, $</th>
+                    <th>Статус</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var car in Model.Cars)
+                {
+                    <tr>
+                        <td>@Html.ActionLink(car.Make + " " + car.Model, "Details", new { id = car.CarId })</td>
+                        <td>@car.Year</td>
+                        <td><code>@car.VinCode</code></td>
+                        <td class="text-end">@car.AuctionPrice.ToString("N0")</td>
+                        <td><span class="badge @car.Status.BadgeClass()">@car.Status.GetDisplayName()</span></td>
+                        <td class="text-end text-nowrap">
+                            @if (role == UserRole.Client)
+                            {
+                                @Html.ActionLink("Створити заявку", "Create", "Orders", new { carId = car.CarId }, new { @class = "btn btn-sm btn-success" })
+                                if (Model.FavoriteIds.Contains(car.CarId))
+                                {
+                                    <span class="badge bg-warning text-dark ms-1">★ в обраному</span>
+                                }
+                                else
+                                {
+                                    using (Html.BeginForm("AddToFavorites", "Cars", new { id = car.CarId }, FormMethod.Post, new { @class = "d-inline" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        @Html.Hidden("returnUrl", returnUrl)
+                                        <button type="submit" class="btn btn-sm btn-outline-warning">☆ В обране</button>
+                                    }
+                                }
+                            }
+                            else if (role == UserRole.Manager)
+                            {
+                                @Html.ActionLink("Редагувати", "Edit", new { id = car.CarId }, new { @class = "btn btn-sm btn-outline-primary" })
+                                @Html.ActionLink("Видалити", "Delete", new { id = car.CarId }, new { @class = "btn btn-sm btn-outline-danger ms-1" })
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

@@ -1,0 +1,32 @@
+﻿@model Order
+@{
+    ViewBag.Title = "Видалити заявку №" + Model.OrderId;
+    bool canDelete = ViewBag.CanDelete;
+}
+
+<h1 class="h3 mb-3">Видалити заявку №@Model.OrderId?</h1>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <p class="mb-1">Клієнт: @Model.Client.Name</p>
+        <p class="mb-1">Авто: @(Model.Car != null ? Model.Car.GetDetails() : "—")</p>
+        <p class="mb-0">Статус: <span class="badge @Model.Status.BadgeClass()">@Model.Status.GetDisplayName()</span></p>
+    </div>
+</div>
+
+@if (!canDelete)
+{
+    <div class="alert alert-warning">Видалити можна лише нову, скасовану або програну заявку.</div>
+    @Html.ActionLink("← Назад", "Details", new { id = Model.OrderId }, new { @class = "btn btn-outline-secondary" })
+}
+else
+{
+    using (Html.BeginForm("Delete", "Orders", new { id = Model.OrderId }, FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-danger">Видалити</button>
+            @Html.ActionLink("Скасувати", "Details", new { id = Model.OrderId }, new { @class = "btn btn-outline-secondary" })
+        </div>
+    }
+}

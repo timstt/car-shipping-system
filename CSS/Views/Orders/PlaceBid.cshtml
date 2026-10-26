@@ -1,0 +1,42 @@
+﻿@model Order
+@{
+    ViewBag.Title = "Аукціон — заявка №" + Model.OrderId;
+    bool budgetOk = Model.Car.AuctionPrice <= Model.MaxBudget;
+}
+
+<h1 class="h3 mb-3">Взяти участь в аукціоні</h1>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <p class="mb-1"><strong>Авто:</strong> @Model.Car.GetDetails()</p>
+        <p class="mb-1"><strong>Ціна на аукціоні:</strong> $@Model.Car.AuctionPrice.ToString("N0")</p>
+        <p class="mb-0"><strong>Бюджет клієнта:</strong> $@Model.MaxBudget.ToString("N0")</p>
+    </div>
+</div>
+
+@if (!budgetOk)
+{
+    <div class="alert alert-danger">
+        Бюджет клієнта не дозволяє взяти участь у торгах. Підтвердіть, щоб сповістити клієнта про неуспішну ставку.
+    </div>
+}
+else
+{
+    <p class="text-muted small">Ставка, не менша за ціну на аукціоні, виграє. Ставка не може перевищувати бюджет клієнта.</p>
+}
+
+@using (Html.BeginForm("PlaceBid", "Orders", new { id = Model.OrderId }, FormMethod.Post, new { @class = "card card-body" }))
+{
+    @Html.AntiForgeryToken()
+    if (budgetOk)
+    {
+        <label class="form-label" for="bidAmount">Сума ставки, $</label>
+        <input type="number" class="form-control mb-1" id="bidAmount" name="bidAmount" min="1" max="@Model.MaxBudget" step="1"
+               value="@Model.Car.AuctionPrice" required />
+        @Html.ValidationMessage("bidAmount", "", new { @class = "text-danger small" })
+    }
+    <div class="mt-3 d-flex gap-2">
+        <button type="submit" class="btn @(budgetOk ? "btn-primary" : "btn-danger")">@(budgetOk ? "Зробити ставку" : "Сповістити клієнта")</button>
+        @Html.ActionLink("Скасувати", "Details", new { id = Model.OrderId }, new { @class = "btn btn-outline-secondary" })
+    </div>
+}

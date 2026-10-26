@@ -1,0 +1,96 @@
+﻿@model OrderReport
+@{
+    ViewBag.Title = "Звітність";
+    string from = Model.From.ToString("yyyy-MM-dd");
+    string to = Model.To.ToString("yyyy-MM-dd");
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Звітність за період</h1>
+    <div class="d-flex gap-2 d-print-none">
+        @Html.ActionLink("Експорт у CSV (Excel)", "Export", new { from = from, to = to }, new { @class = "btn btn-success" })
+        <button type="button" class="btn btn-outline-secondary" onclick="window.print()">Друк / PDF</button>
+    </div>
+</div>
+
+@using (Html.BeginForm("Index", "Reports", FormMethod.Get, new { @class = "row g-2 align-items-end mb-4 d-print-none" }))
+{
+    <div class="col-auto">
+        <label class="form-label small" for="from">З</label>
+        <input type="date" class="form-control" id="from" name="from" value="@from" />
+    </div>
+    <div class="col-auto">
+        <label class="form-label small" for="to">По</label>
+        <input type="date" class="form-control" id="to" name="to" value="@to" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Сформувати</button>
+    </div>
+}
+
+<p class="text-muted">Період: @Model.From.ToString("dd.MM.yyyy") — @Model.To.ToString("dd.MM.yyyy")</p>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card text-center h-100"><div class="card-body">
+            <div class="text-muted small">Усього заявок</div>
+            <div class="fs-3 fw-semibold">@Model.Orders.Count</div>
+        </div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center h-100"><div class="card-body">
+            <div class="text-muted small">Оплачено заявок</div>
+            <div class="fs-3 fw-semibold">@Model.PaidCount</div>
+        </div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center h-100"><div class="card-body">
+            <div class="text-muted small">Сума оплачених, $</div>
+            <div class="fs-3 fw-semibold">@Model.PaidTotal.ToString("N0")</div>
+        </div></div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-4">
+        <h2 class="h6">За статусами</h2>
+        <table class="table table-sm">
+            <tbody>
+                @foreach (var pair in Model.CountByStatus)
+                {
+                    <tr>
+                        <td><span class="badge @pair.Key.BadgeClass()">@pair.Key.GetDisplayName()</span></td>
+                        <td class="text-end">@pair.Value</td>
+                    </tr>
+                }
+                @if (!Model.CountByStatus.Any())
+                {
+                    <tr><td class="text-muted">Заявок за період немає</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="col-lg-8">
+        <h2 class="h6">Заявки</h2>
+        <div class="table-responsive">
+            <table class="table table-sm table-striped">
+                <thead>
+                    <tr><th>№</th><th>Дата</th><th>Клієнт</th><th>Авто</th><th class="text-end">Ціна, $</th><th>Статус</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var o in Model.Orders)
+                    {
+                        <tr>
+                            <td>@Html.ActionLink(o.OrderId.ToString(), "Details", "Orders", new { id = o.OrderId }, null)</td>
+                            <td>@o.CreatedAt.ToString("dd.MM.yyyy")</td>
+                            <td>@(o.Client != null ? o.Client.Name : "")</td>
+                            <td>@(o.Car != null ? o.Car.Make + " " + o.Car.Model : "—")</td>
+                            <td class="text-end">@(o.FinalPrice.HasValue ? o.FinalPrice.Value.ToString("N0") : "—")</td>
+                            <td>@o.Status.GetDisplayName()</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

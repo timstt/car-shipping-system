@@ -1,0 +1,9 @@
+﻿.vs/
+bin/
+obj/
+packages/
+*.user
+*.suo
+App_Data/*.mdf
+App_Data/*.ldf
+*.pdf

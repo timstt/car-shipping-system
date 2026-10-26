@@ -1,0 +1,43 @@
+﻿@model IEnumerable<Car>
+@{
+    ViewBag.Title = "Обране";
+}
+
+<h1 class="h3 mb-3">Обрані авто</h1>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-secondary">
+        Список обраного порожній. @Html.ActionLink("Перейти до каталогу", "Index")
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var car in Model)
+        {
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="h6">@car.Make @car.Model (@car.Year)</h2>
+                        <p class="mb-1">$@car.AuctionPrice.ToString("N0")</p>
+                        <span class="badge @car.Status.BadgeClass()">@car.Status.GetDisplayName()</span>
+                    </div>
+                    <div class="card-footer d-flex flex-wrap gap-2">
+                        @Html.ActionLink("Деталі", "Details", new { id = car.CarId }, new { @class = "btn btn-sm btn-outline-primary" })
+                        @if (car.Status == CarStatus.Available)
+                        {
+                            @Html.ActionLink("Створити заявку", "Create", "Orders", new { carId = car.CarId }, new { @class = "btn btn-sm btn-success" })
+                        }
+                        @using (Html.BeginForm("RemoveFromFavorites", "Cars", new { id = car.CarId }, FormMethod.Post))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.Hidden("returnUrl", Url.Action("Favorites"))
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Прибрати</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
