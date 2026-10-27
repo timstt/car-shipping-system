@@ -1,0 +1,74 @@
+﻿@using ASTCUSA.Models.Lab3
+@model CarsPage
+@{
+    ViewBag.Title = "БД і LINQ — авто";
+}
+
+@Html.Partial("_Lab3Nav")
+@Html.Partial("_QueryInfo", Model.Info)
+
+@using (Html.BeginForm("Cars", "Lab3", FormMethod.Get, new { @class = "card card-body mb-3" }))
+{
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    <div class="row g-2 align-items-start">
+        <div class="col-md-3">
+            @Html.LabelFor(m => m.Make, new { @class = "form-label small" })
+            @Html.TextBoxFor(m => m.Make, new { @class = "form-control", placeholder = "напр. Toyota" })
+            @Html.ValidationMessageFor(m => m.Make, "", new { @class = "text-danger small" })
+        </div>
+        <div class="col-md-2">
+            @Html.LabelFor(m => m.YearFrom, new { @class = "form-label small" })
+            @Html.TextBoxFor(m => m.YearFrom, new { @class = "form-control", inputmode = "numeric" })
+            @Html.ValidationMessageFor(m => m.YearFrom, "", new { @class = "text-danger small" })
+        </div>
+        <div class="col-md-2">
+            @Html.LabelFor(m => m.YearTo, new { @class = "form-label small" })
+            @Html.TextBoxFor(m => m.YearTo, new { @class = "form-control", inputmode = "numeric" })
+            @Html.ValidationMessageFor(m => m.YearTo, "", new { @class = "text-danger small" })
+        </div>
+        <div class="col-md-2">
+            @Html.LabelFor(m => m.PriceFrom, new { @class = "form-label small" })
+            @Html.TextBoxFor(m => m.PriceFrom, new { @class = "form-control", inputmode = "decimal" })
+            @Html.ValidationMessageFor(m => m.PriceFrom, "", new { @class = "text-danger small" })
+        </div>
+        <div class="col-md-2">
+            @Html.LabelFor(m => m.PriceTo, new { @class = "form-label small" })
+            @Html.TextBoxFor(m => m.PriceTo, new { @class = "form-control", inputmode = "decimal" })
+            @Html.ValidationMessageFor(m => m.PriceTo, "", new { @class = "text-danger small" })
+        </div>
+        <div class="col-md-1 d-flex flex-column">
+            <span class="form-label small">&nbsp;</span>
+            <button type="submit" class="btn btn-primary">Знайти</button>
+        </div>
+    </div>
+    <div class="mt-2 small">@Html.ActionLink("Скинути фільтр", "Cars")</div>
+}
+
+@if (Model.Cars != null)
+{
+    <p class="text-muted">Знайдено авто: @Model.Cars.Count</p>
+    <div class="table-responsive">
+        <table class="table table-sm table-striped">
+            <thead>
+                <tr><th>ID</th><th>VIN</th><th>Марка</th><th>Модель</th><th>Рік</th><th class="text-end">Ціна, $</th><th>Статус</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model.Cars)
+                {
+                    <tr>
+                        <td>@c.CarId</td><td><code>@c.VinCode</code></td><td>@c.Make</td><td>@c.Model</td><td>@c.Year</td>
+                        <td class="text-end">@c.AuctionPrice.ToString("N0")</td><td>@Lab3Text.CarStatusName(c.Status)</td>
+                    </tr>
+                }
+                @if (!Model.Cars.Any())
+                {
+                    <tr><td colspan="7" class="text-muted">Авто за цими умовами не знайдено</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

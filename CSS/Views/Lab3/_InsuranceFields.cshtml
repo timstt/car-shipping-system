@@ -1,0 +1,25 @@
+﻿@using ASTCUSA.Models.Lab3
+@model InsuranceInput
+<div class="row g-2 align-items-start">
+    <div class="col-md-5">
+        @Html.LabelFor(m => m.OrderId, new { @class = "form-label small" })
+        @Html.DropDownListFor(m => m.OrderId, (SelectList)ViewBag.Orders, "— оберіть заявку —", new { @class = "form-select" })
+        @Html.ValidationMessageFor(m => m.OrderId, "", new { @class = "text-danger small" })
+    </div>
+    <div class="col-md-4">
+        @Html.LabelFor(m => m.Type, new { @class = "form-label small" })
+        @Html.TextBoxFor(m => m.Type, new { @class = "form-control", list = "insurance-types", placeholder = "напр. Повне (усі ризики)" })
+        <datalist id="insurance-types">
+            <option value="Базове (КАСКО на час перевезення)"></option>
+            <option value="Розширене (КАСКО + пошкодження в порту)"></option>
+            <option value="Повне (усі ризики)"></option>
+            <option value="Страхування вантажу"></option>
+        </datalist>
+        @Html.ValidationMessageFor(m => m.Type, "", new { @class = "text-danger small" })
+    </div>
+    <div class="col-md-3">
+        @Html.LabelFor(m => m.Price, new { @class = "form-label small" })
+        @Html.TextBoxFor(m => m.Price, new { @class = "form-control", inputmode = "decimal" })
+        @Html.ValidationMessageFor(m => m.Price, "", new { @class = "text-danger small" })
+    </div>
+</div>

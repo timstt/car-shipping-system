@@ -1,0 +1,30 @@
+﻿@using ASTCUSA.Models.Lab3
+@model Lab3IndexPage
+@{
+    ViewBag.Title = "БД і LINQ";
+}
+
+@Html.Partial("_Lab3Nav")
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h2 class="h5 card-title">Окрема локальна база</h2>
+        <p class="mb-1">Сервер: <code>@Model.Server</code>, база: <code>@Model.Database</code>.</p>
+        <p class="mb-1">Базу створює й наповнює скрипт <code>docs/lab3/create_and_seed.sql</code> під час першого відкриття цієї сторінки, якщо бази ще немає.</p>
+        <p class="mb-0 text-muted small">Переглянути базу у Visual Studio: View → SQL Server Object Explorer → (localdb)\MSSQLLocalDB → Databases → @Model.Database.</p>
+    </div>
+</div>
+
+@Html.Partial("_QueryInfo", Model.Info)
+
+<table class="table table-sm table-striped w-auto">
+    <thead>
+        <tr><th>Таблиця</th><th>Клас діаграми</th><th class="text-end">Рядків</th></tr>
+    </thead>
+    <tbody>
+        @foreach (var t in Model.Tables)
+        {
+            <tr><td><code>@t.Table</code></td><td>@t.Entity</td><td class="text-end">@t.Count</td></tr>
+        }
+    </tbody>
+</table>

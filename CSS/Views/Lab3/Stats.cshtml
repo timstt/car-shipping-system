@@ -1,0 +1,54 @@
+﻿@using ASTCUSA.Models.Lab3
+@model StatsPage
+@{
+    ViewBag.Title = "БД і LINQ — групування";
+    bool byMake = Model.GroupBy == "make";
+}
+
+@Html.Partial("_Lab3Nav")
+@Html.Partial("_QueryInfo", Model.Info)
+
+@using (Html.BeginForm("Stats", "Lab3", FormMethod.Get, new { @class = "card card-body mb-3" }))
+{
+    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+    <div class="d-flex flex-wrap gap-3 align-items-center">
+        <span class="small">Групувати за:</span>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="GroupBy" id="by-status" value="status" @(byMake ? "" : "checked") />
+            <label class="form-check-label" for="by-status">статусом заявки</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="GroupBy" id="by-make" value="make" @(byMake ? "checked" : "") />
+            <label class="form-check-label" for="by-make">маркою авто</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Показати</button>
+    </div>
+}
+
+@if (Model.Rows != null)
+{
+    <div class="table-responsive">
+        <table class="table table-sm table-striped w-auto">
+            <thead>
+                <tr>
+                    <th>@(byMake ? "Марка" : "Статус заявки")</th><th class="text-end">Заявок</th>
+                    <th class="text-end">Середня ціна авто, $</th><th class="text-end">Мін., $</th><th class="text-end">Макс., $</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model.Rows)
+                {
+                    <tr>
+                        <td>@(byMake ? r.Key : Lab3Text.OrderStatusName(r.Key))</td><td class="text-end">@r.OrdersCount</td>
+                        <td class="text-end">@r.AvgCarPrice.ToString("N0")</td>
+                        <td class="text-end">@r.MinCarPrice.ToString("N0")</td>
+                        <td class="text-end">@r.MaxCarPrice.ToString("N0")</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr class="fw-semibold"><td>Разом</td><td class="text-end">@Model.Rows.Sum(r => r.OrdersCount)</td><td colspan="3"></td></tr>
+            </tfoot>
+        </table>
+    </div>
+}

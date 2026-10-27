@@ -1,0 +1,79 @@
+﻿@using ASTCUSA.Models.Lab3
+@model PaidInvoicesPage
+@{
+    ViewBag.Title = "БД і LINQ — оплати за період";
+    // Список будується вручну: EnumDropDownListFor падає, якщо в рядку запиту невідоме значення періоду
+    var periods = Enum.GetValues(typeof(PeriodType)).Cast<PeriodType>()
+        .Select(p => new SelectListItem { Value = p.ToString(), Text = p.GetDisplayName() });
+}
+
+@Html.Partial("_Lab3Nav")
+@Html.Partial("_QueryInfo", Model.SummaryInfo)
+
+@using (Html.BeginForm("PaidInvoices", "Lab3", FormMethod.Get, new { @class = "card card-body mb-3" }))
+{
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    <div class="row g-2 align-items-start">
+        <div class="col-md-3">
+            @Html.LabelFor(m => m.Period, new { @class = "form-label small" })
+            @Html.DropDownListFor(m => m.Period, periods, "— оберіть —", new { @class = "form-select" })
+            @Html.ValidationMessageFor(m => m.Period, "", new { @class = "text-danger small" })
+        </div>
+        <div class="col-md-3">
+            @Html.LabelFor(m => m.Date, new { @class = "form-label small" })
+            @Html.TextBoxFor(m => m.Date, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+            @Html.ValidationMessageFor(m => m.Date, "", new { @class = "text-danger small" })
+        </div>
+        <div class="col-md-2 d-flex flex-column">
+            <span class="form-label small">&nbsp;</span>
+            <button type="submit" class="btn btn-primary">Порахувати</button>
+        </div>
+    </div>
+    <div class="mt-2 small text-muted">Оплати в базі — з лютого по жовтень 2026 року (напр. місяць 10.2026, день 12.08.2026, перше півріччя 2026).</div>
+}
+
+@if (Model.Ran)
+{
+    <p class="text-muted">Період: @Model.Start.ToString("dd.MM.yyyy") — @Model.End.AddDays(-1).ToString("dd.MM.yyyy")</p>
+    <div class="row g-3 mb-3">
+        <div class="col-md-4">
+            <div class="card text-center h-100"><div class="card-body">
+                <div class="text-muted small">Сума оплачених, $</div>
+                <div class="fs-3 fw-semibold">@Model.Total.ToString("N2")</div>
+            </div></div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center h-100"><div class="card-body">
+                <div class="text-muted small">Кількість оплат</div>
+                <div class="fs-3 fw-semibold">@Model.Count</div>
+            </div></div>
+        </div>
+    </div>
+
+    @Html.Partial("_QueryInfo", Model.ListInfo)
+    <div class="table-responsive">
+        <table class="table table-sm table-striped">
+            <thead>
+                <tr><th>Інвойс</th><th>Заявка</th><th>Клієнт</th><th>Дата оплати</th><th class="text-end">Сума, $</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model.Rows)
+                {
+                    <tr>
+                        <td>@r.InvoiceId</td><td>№@r.OrderId</td><td>@r.ClientName</td>
+                        <td>@(r.PaidAt.HasValue ? r.PaidAt.Value.ToString("dd.MM.yyyy HH:mm") : "—")</td>
+                        <td class="text-end">@r.TotalAmount.ToString("N2")</td>
+                    </tr>
+                }
+                @if (!Model.Rows.Any())
+                {
+                    <tr><td colspan="5" class="text-muted">Оплат за цей період немає</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

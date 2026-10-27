@@ -1,0 +1,71 @@
+﻿@using ASTCUSA.Models.Lab3
+@model ClientOrdersPage
+@{
+    ViewBag.Title = "БД і LINQ — заявки клієнта";
+    var statuses = Enum.GetValues(typeof(OrderStatus)).Cast<OrderStatus>()
+        .Select(s => new SelectListItem { Value = s.ToString(), Text = s.GetDisplayName(), Selected = Model.Status == s.ToString() });
+}
+
+@Html.Partial("_Lab3Nav")
+@Html.Partial("_QueryInfo", Model.Info)
+
+@using (Html.BeginForm("ClientOrders", "Lab3", FormMethod.Get, new { @class = "card card-body mb-3" }))
+{
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    <div class="row g-2 align-items-start">
+        <div class="col-md-5">
+            @Html.LabelFor(m => m.Email, new { @class = "form-label small" })
+            @Html.TextBoxFor(m => m.Email, new { @class = "form-control", list = "client-emails", placeholder = "ivan@mail.com" })
+            <datalist id="client-emails">
+                @foreach (var e in Model.ClientEmails)
+                {
+                    <option value="@e"></option>
+                }
+            </datalist>
+            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger small" })
+        </div>
+        <div class="col-md-4">
+            @Html.LabelFor(m => m.Status, new { @class = "form-label small" })
+            @Html.DropDownList("Status", statuses, "Усі статуси", new { @class = "form-select" })
+            @Html.ValidationMessageFor(m => m.Status, "", new { @class = "text-danger small" })
+        </div>
+        <div class="col-md-2 d-flex flex-column">
+            <span class="form-label small">&nbsp;</span>
+            <button type="submit" class="btn btn-primary">Знайти</button>
+        </div>
+    </div>
+    <div class="mt-2 small text-muted">Клієнти в базі: @string.Join(", ", Model.ClientEmails)</div>
+}
+
+@if (Model.Rows != null)
+{
+    <p class="text-muted">Знайдено заявок: @Model.Rows.Count</p>
+    <div class="table-responsive">
+        <table class="table table-sm table-striped">
+            <thead>
+                <tr><th>№</th><th>Дата</th><th>Клієнт</th><th>Авто</th><th class="text-end">Бюджет, $</th><th class="text-end">Ціна, $</th><th>Статус</th><th>Менеджер</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model.Rows)
+                {
+                    <tr>
+                        <td>@r.OrderId</td><td>@r.CreatedAt.ToString("dd.MM.yyyy")</td><td>@r.ClientName</td>
+                        <td>@r.Make @r.Model (@r.Year)</td>
+                        <td class="text-end">@r.MaxBudget.ToString("N0")</td>
+                        <td class="text-end">@(r.FinalPrice.HasValue ? r.FinalPrice.Value.ToString("N0") : "—")</td>
+                        <td>@Lab3Text.OrderStatusName(r.Status)</td>
+                        <td>@(r.ManagerName ?? "—")</td>
+                    </tr>
+                }
+                @if (!Model.Rows.Any())
+                {
+                    <tr><td colspan="8" class="text-muted">Заявок не знайдено (немає такого клієнта або заявок із цим статусом)</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

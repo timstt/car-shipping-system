@@ -1,0 +1,15 @@
+﻿@{
+    string current = (string)ViewContext.RouteData.Values["action"];
+    Func<string, string> cls = a => "nav-link" + (string.Equals(current, a, StringComparison.OrdinalIgnoreCase)
+        || (a == "Insurances" && string.Equals(current, "EditInsurance", StringComparison.OrdinalIgnoreCase)) ? " active" : "");
+}
+<h1 class="h3 mb-3">Лабораторна №3: локальна база даних і LINQ</h1>
+<ul class="nav nav-tabs mb-3 flex-wrap">
+    <li class="nav-item">@Html.ActionLink("База даних", "Index", "Lab3", null, new { @class = cls("Index") })</li>
+    <li class="nav-item">@Html.ActionLink("1. Авто", "Cars", "Lab3", null, new { @class = cls("Cars") })</li>
+    <li class="nav-item">@Html.ActionLink("2. Заявки клієнта", "ClientOrders", "Lab3", null, new { @class = cls("ClientOrders") })</li>
+    <li class="nav-item">@Html.ActionLink("3. Оплати за період", "PaidInvoices", "Lab3", null, new { @class = cls("PaidInvoices") })</li>
+    <li class="nav-item">@Html.ActionLink("4. Доставки", "Deliveries", "Lab3", null, new { @class = cls("Deliveries") })</li>
+    <li class="nav-item">@Html.ActionLink("5. Групування", "Stats", "Lab3", null, new { @class = cls("Stats") })</li>
+    <li class="nav-item">@Html.ActionLink("6. Страховки", "Insurances", "Lab3", null, new { @class = cls("Insurances") })</li>
+</ul>

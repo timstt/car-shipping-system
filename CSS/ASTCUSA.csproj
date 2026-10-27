@@ -132,6 +132,12 @@
     <Compile Include="Controllers\CarsController.cs" />
     <Compile Include="Controllers\OrdersController.cs" />
     <Compile Include="Controllers\ReportsController.cs" />
+    <Compile Include="Controllers\Lab3Controller.cs" />
+    <Compile Include="Models\Lab3\Lab3Context.cs" />
+    <Compile Include="Models\Lab3\Lab3Database.cs" />
+    <Compile Include="Models\Lab3\Lab3Entities.cs" />
+    <Compile Include="Models\Lab3\Lab3Queries.cs" />
+    <Compile Include="Models\Lab3\Lab3ViewModels.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\AuthTicket.cs" />
     <Compile Include="Models\Car.cs" />
@@ -224,6 +230,24 @@
     <Content Include="Views\Orders\PlaceBid.cshtml" />
     <Content Include="Views\Orders\TrackDelivery.cshtml" />
     <Content Include="Views\Reports\Index.cshtml" />
+    <Content Include="Views\Lab3\_Lab3Nav.cshtml" />
+    <Content Include="Views\Lab3\_QueryInfo.cshtml" />
+    <Content Include="Views\Lab3\_InsuranceFields.cshtml" />
+    <Content Include="Views\Lab3\Index.cshtml" />
+    <Content Include="Views\Lab3\Cars.cshtml" />
+    <Content Include="Views\Lab3\ClientOrders.cshtml" />
+    <Content Include="Views\Lab3\PaidInvoices.cshtml" />
+    <Content Include="Views\Lab3\Deliveries.cshtml" />
+    <Content Include="Views\Lab3\Stats.cshtml" />
+    <Content Include="Views\Lab3\Insurances.cshtml" />
+    <Content Include="Views\Lab3\EditInsurance.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Лабораторна №3: SQL-скрипт створення бази вбудовано в збірку, Lab3Database виконує його під час першого запуску -->
+    <EmbeddedResource Include="..\docs\lab3\create_and_seed.sql">
+      <Link>Lab3\create_and_seed.sql</Link>
+      <LogicalName>ASTCUSA.Lab3.create_and_seed.sql</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

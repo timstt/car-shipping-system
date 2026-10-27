@@ -1,0 +1,57 @@
+﻿@using ASTCUSA.Models.Lab3
+@model InsurancesPage
+@{
+    ViewBag.Title = "БД і LINQ — страховки";
+}
+
+@Html.Partial("_Lab3Nav")
+@Html.Partial("_QueryInfo", Model.CrudInfo)
+
+@using (Html.BeginForm("CreateInsurance", "Lab3", FormMethod.Post, new { @class = "card card-body mb-3" }))
+{
+    @Html.AntiForgeryToken()
+    <h2 class="h6">Нова страховка</h2>
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    @Html.Partial("_InsuranceFields", (InsuranceInput)Model)
+    <div class="mt-2">
+        <button type="submit" class="btn btn-success">Додати</button>
+    </div>
+}
+
+@Html.Partial("_QueryInfo", Model.ListInfo)
+
+<p class="text-muted">Усього страховок: @Model.Rows.Count</p>
+<div class="table-responsive">
+    <table class="table table-sm table-striped align-middle">
+        <thead>
+            <tr><th>ID</th><th>Заявка</th><th>Клієнт</th><th>Тип</th><th class="text-end">Ціна, $</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var r in Model.Rows)
+            {
+                <tr>
+                    <td>@r.InsuranceId</td>
+                    <td>№@r.OrderId <small class="text-muted">(@Lab3Text.OrderStatusName(r.OrderStatus))</small></td>
+                    <td>@r.ClientName</td><td>@r.Type</td>
+                    <td class="text-end">@r.Price.ToString("N2")</td>
+                    <td class="text-nowrap">
+                        @Html.ActionLink("Змінити", "EditInsurance", new { id = r.InsuranceId }, new { @class = "btn btn-sm btn-outline-primary" })
+                        @using (Html.BeginForm("DeleteInsurance", "Lab3", new { id = r.InsuranceId }, FormMethod.Post, new { @class = "d-inline", onsubmit = "return confirm('Видалити страховку №" + r.InsuranceId + "?');" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Видалити</button>
+                        }
+                    </td>
+                </tr>
+            }
+            @if (!Model.Rows.Any())
+            {
+                <tr><td colspan="6" class="text-muted">Страховок немає</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

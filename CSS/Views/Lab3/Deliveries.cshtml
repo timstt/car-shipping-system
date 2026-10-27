@@ -1,0 +1,63 @@
+﻿@using ASTCUSA.Models.Lab3
+@model DeliveriesPage
+@{
+    ViewBag.Title = "БД і LINQ — доставки";
+    var statuses = Model.Statuses.Select(s => new SelectListItem { Value = s, Text = s, Selected = Model.Status == s });
+    var customs = new[]
+    {
+        new SelectListItem { Value = "true", Text = "Розмитнено", Selected = Model.CustomsCleared == true },
+        new SelectListItem { Value = "false", Text = "Не розмитнено", Selected = Model.CustomsCleared == false }
+    };
+}
+
+@Html.Partial("_Lab3Nav")
+@Html.Partial("_QueryInfo", Model.Info)
+
+@using (Html.BeginForm("Deliveries", "Lab3", FormMethod.Get, new { @class = "card card-body mb-3" }))
+{
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    <div class="row g-2 align-items-start">
+        <div class="col-md-4">
+            @Html.LabelFor(m => m.Status, new { @class = "form-label small" })
+            @Html.DropDownList("Status", statuses, "Усі статуси", new { @class = "form-select" })
+            @Html.ValidationMessageFor(m => m.Status, "", new { @class = "text-danger small" })
+        </div>
+        <div class="col-md-3">
+            @Html.LabelFor(m => m.CustomsCleared, new { @class = "form-label small" })
+            @Html.DropDownList("CustomsCleared", customs, "Будь-яка", new { @class = "form-select" })
+            @Html.ValidationMessageFor(m => m.CustomsCleared, "", new { @class = "text-danger small" })
+        </div>
+        <div class="col-md-2 d-flex flex-column">
+            <span class="form-label small">&nbsp;</span>
+            <button type="submit" class="btn btn-primary">Показати</button>
+        </div>
+    </div>
+}
+
+@if (Model.Rows != null)
+{
+    <p class="text-muted">Знайдено доставок: @Model.Rows.Count</p>
+    <div class="table-responsive">
+        <table class="table table-sm table-striped">
+            <thead>
+                <tr><th>Заявка</th><th>Трек-номер</th><th>Статус доставки</th><th>Де зараз</th><th>Митниця</th><th>Авто</th><th>Клієнт</th><th>Логіст</th><th>Статус заявки</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model.Rows)
+                {
+                    <tr>
+                        <td>№@r.OrderId</td><td><code>@r.TrackingNumber</code></td><td>@r.Status</td><td>@r.CurrentLocation</td>
+                        <td>@(r.IsCustomsCleared ? "так" : "ні")</td>
+                        <td>@r.Make @r.Model<br /><small class="text-muted">@r.VinCode</small></td>
+                        <td>@r.ClientName</td><td>@(r.LogisticianName ?? "—")</td>
+                        <td>@Lab3Text.OrderStatusName(r.OrderStatus)</td>
+                    </tr>
+                }
+                @if (!Model.Rows.Any())
+                {
+                    <tr><td colspan="9" class="text-muted">Доставок за цими умовами немає</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

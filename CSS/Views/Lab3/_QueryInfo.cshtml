@@ -1,0 +1,23 @@
+﻿@using ASTCUSA.Models.Lab3
+@model QueryInfo
+<div class="card mb-3">
+    <div class="card-body">
+        <h2 class="h5 card-title">@Model.Title</h2>
+        <div class="mb-2">
+            @foreach (var kind in Model.Kinds ?? new string[0])
+            {
+                <span class="badge text-bg-secondary me-1">@kind</span>
+            }
+        </div>
+        <p class="card-text">@Model.Description</p>
+        <div class="small text-muted mb-1">LINQ-вираз:</div>
+        <pre class="bg-light border rounded p-2 small mb-2"><code>@Model.Linq</code></pre>
+        @if (!string.IsNullOrEmpty(Model.Sql))
+        {
+            <details>
+                <summary class="small">Згенерований SQL (ToString())</summary>
+                <pre class="bg-light border rounded p-2 small mt-2 mb-0"><code>@Model.Sql</code></pre>
+            </details>
+        }
+    </div>
+</div>
