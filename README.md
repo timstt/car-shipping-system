@@ -36,7 +36,6 @@ Access is controlled by role. All pages except the home page, login and registra
 - Confirm or reject the client's payment. Rejection returns the invoice to unpaid and notifies the client; confirmation marks the order and the car as *Paid* and passes the order to logistics.
 - Delete orders that are *New*, *Cancelled* or *Bid lost*.
 - Build a report for a date range (orders, counts by status, number and total of paid orders) and export it as a CSV file that opens in Excel.
-- Open the **DB & LINQ** section (lab 3): LINQ queries against a separate database (see [Data layer](#data-layer-and-linq-lab-3)).
 
 ### Logistician
 
@@ -55,56 +54,11 @@ Access is controlled by role. All pages except the home page, login and registra
 | Framework | ASP.NET MVC 5 (5.2.9), Razor views |
 | Runtime | .NET Framework 4.7.2 |
 | Data access | Entity Framework 6 (6.5.1), Code First |
-| Database | SQL Server LocalDB (`(localdb)\MSSQLLocalDB`): `astcusa` (main app) and `astcusa_lab3` (lab 3, queries) |
+| Database | SQL Server LocalDB (`(localdb)\MSSQLLocalDB`, database `astcusa`) |
 | UI | Bootstrap 5.2.3, jQuery, jQuery Validation |
 | Authentication | Forms Authentication cookie; passwords stored as PBKDF2 hashes |
 
 The database is created automatically on first run by `ImportInitializer` (`DropCreateDatabaseIfModelChanges`), which also seeds test users and cars. If the model changes, the database is dropped and recreated.
-
-## Data layer and LINQ (lab 3)
-
-Besides the main database `astcusa` (EF Code First, used by the app), the project has a **separate relational database `astcusa_lab3`** that follows the UML class diagram and is used to practice SQL and LINQ.
-
-- **6 tables**: `Users`, `Cars`, `Orders`, `Insurances`, `Invoices`, `Deliveries`; 7 foreign keys, unique and check constraints, 12-26 seeded rows per table.
-- Created by the idempotent T-SQL script [`docs/lab3/create_and_seed.sql`](docs/lab3/create_and_seed.sql). The site runs it automatically on the first visit to the **DB & LINQ** page if the database does not exist (`Lab3Database.EnsureCreated`).
-- Accessed through a second `DbContext` (`Lab3Context`, connection string `Lab3Connection`), independent from `ImportContext`.
-- The **DB & LINQ** page is available to the Manager only. For each query it shows the LINQ expression, the generated SQL and the result table.
-
-| # | Query | Demonstrates |
-|---|---|---|
-| 1 | Cars filtered by make, year range and price | Filtering, sorting |
-| 2 | Client orders by e-mail and status | Filtering, joins, left join |
-| 3 | Sum and count of paid invoices for a day, month or half-year chosen by the user | Aggregation (`Sum`, `Count`) over a period |
-| 4 | Deliveries by status and customs state | Filtering, join of five tables |
-| 5 | Orders grouped by status or car make | `group by`, `Count`, `Average`, `Min`, `Max` |
-| 6 | Insurances: add, edit, delete | INSERT / UPDATE / DELETE via LINQ (POST + anti-forgery token) |
-
-The full lab report is in [`docs/lab3-report.md`](docs/lab3-report.md).
-
-## Project management
-
-The project is planned and tracked as a Scrum project in **Jira** and documented in **Confluence** (charter, requirements, UML, WBS, Gantt, RACI, risk register, meeting notes).
-
-- Confluence overview (public page): [Car shipping system](https://timst2008.atlassian.net/wiki/external/ZmRiYWViMzIyZjkwNGZkM2IzZTU4MDc0YTUyYWQ5MmY)
-- Full Confluence export (PDF): [`docs/confluence/CSS-Confluence-export.pdf`](docs/confluence/CSS-Confluence-export.pdf)
-
-### Jira
-
-Kanban board with the current sprint:
-
-![Jira board](docs/images/jira-board.png)
-
-Timeline with epics, sprints and releases (v1.0 MVP, v1.1):
-
-![Jira timeline](docs/images/jira-timeline.png)
-
-Sprint planning (sprint 2 with its goal and estimates):
-
-![Jira sprint 2](docs/images/jira-sprint-2.png)
-
-Project summary (status, priority and work type breakdown):
-
-![Jira summary](docs/images/jira-summary.png)
 
 ## Getting started
 
@@ -114,7 +68,7 @@ Requirements: Visual Studio with the **ASP.NET and web development** workload (i
 2. Press **F5**. NuGet packages are restored on build.
 3. The site opens at **https://localhost:44392**.
 
-The connection strings (`DbConnection`, `Lab3Connection`) are in `CSS/Web.config`. The lab 3 database `astcusa_lab3` is created on the first visit to the **DB & LINQ** page (sign in as the manager).
+The connection string (`DbConnection`) is in `CSS/Web.config`.
 
 ## Test accounts
 
@@ -134,9 +88,6 @@ Six cars are also seeded (Toyota Camry, Honda Civic, Ford Mustang, Tesla Model 3
 ```
 CSS.slnx                     Solution file
 docs/diagrams/               UML diagrams (see below)
-docs/lab3/                   T-SQL script for the lab 3 database
-docs/confluence/             Confluence documentation export (PDF)
-docs/images/                 Jira screenshots
 CSS/                         Web project (ASTCUSA.csproj)
 ├── App_Start/               Bundles, global filters ([Authorize]), routes
 ├── Controllers/
@@ -145,8 +96,7 @@ CSS/                         Web project (ASTCUSA.csproj)
 │   ├── HomeController.cs    Home page / role dashboard
 │   ├── CarsController.cs    Catalog, search, favorites, car CRUD
 │   ├── OrdersController.cs  Order workflow for all three roles
-│   ├── ReportsController.cs Reports and CSV export
-│   └── Lab3Controller.cs    DB & LINQ queries (manager only)
+│   └── ReportsController.cs Reports and CSV export
 ├── Models/
 │   ├── User.cs              Abstract User + Client, Manager, Logistician (TPH)
 │   ├── Car.cs, CarCatalog.cs
@@ -156,12 +106,28 @@ CSS/                         Web project (ASTCUSA.csproj)
 │   ├── ImportContext.cs     EF DbContext
 │   ├── ImportInitializer.cs DB initializer and seed data
 │   ├── AuthTicket.cs, PasswordHasher.cs
-│   ├── AccountViewModels.cs
-│   └── Lab3/                Lab3Context, entities, queries, view models
-├── Views/                   Razor views: Account, Cars, Home, Lab3, Orders, Reports, Shared
+│   └── AccountViewModels.cs
+├── Views/                   Razor views: Account, Cars, Home, Orders, Reports, Shared
 ├── Content/, Scripts/       CSS and JS (Bootstrap, jQuery)
 └── Web.config               Connection string and app settings
 ```
+
+## Project management
+
+The project is planned and tracked in **Jira** and documented in **Confluence**.
+
+- Confluence (public page): [Car shipping system](https://timst2008.atlassian.net/wiki/external/ZmRiYWViMzIyZjkwNGZkM2IzZTU4MDc0YTUyYWQ5MmY)
+- Full Confluence export (PDF): [CSS-Confluence-export.pdf](docs/confluence/CSS-Confluence-export.pdf)
+
+### Jira
+
+![Jira board](docs/images/jira-board.png)
+
+![Jira timeline](docs/images/jira-timeline.png)
+
+![Jira sprint 2](docs/images/jira-sprint-2.png)
+
+![Jira summary](docs/images/jira-summary.png)
 
 ## Diagrams
 
