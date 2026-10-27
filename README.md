@@ -115,8 +115,6 @@ CSS/                         Web project (ASTCUSA.csproj)
 ## Project management
 
 The project is planned and tracked in **Jira** and documented in **Confluence**.
-
-- Confluence (public page): [Car shipping system](https://timst2008.atlassian.net/wiki/external/ZmRiYWViMzIyZjkwNGZkM2IzZTU4MDc0YTUyYWQ5MmY)
 - Full Confluence export (PDF): [CSS-Confluence-export.pdf](docs/confluence/CSS-Confluence-export.pdf)
 
 ### Jira
@@ -129,24 +127,4 @@ The project is planned and tracked in **Jira** and documented in **Confluence**.
 
 ![Jira summary](docs/images/jira-summary.png)
 
-## Diagrams
 
-The code follows the UML diagrams in `docs/diagrams`.
-
-### Use case diagram
-
-![Use case diagram](docs/diagrams/OOPfirst.drawio.webp)
-
-> The diagram mentions exporting the report to PDF / Excel; the implementation exports CSV, which opens in Excel.
-
-### Class diagram
-
-![Class diagram](docs/diagrams/OOP3.webp)
-
-### Activity diagram
-
-![Activity diagram](docs/diagrams/statediagram.webp)
-
-### Car state diagram
-
-![Car state diagram](docs/diagrams/OOP4.webp)
