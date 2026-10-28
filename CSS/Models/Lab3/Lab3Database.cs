@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 namespace ASTCUSA.Models.Lab3
 {
     // Створення бази astcusa_lab3 під час першого звернення до неї.
-    // Виконує той самий скрипт docs/lab3/create_and_seed.sql, вбудований у збірку
+    // Виконує той самий скрипт docs/database/create_and_seed.sql, вбудований у збірку
     // як ресурс (див. ASTCUSA.csproj, EmbeddedResource). Якщо база й таблиці вже є,
     // нічого не робить, тож дані, змінені на сторінці «БД і LINQ», зберігаються.
     public static class Lab3Database
