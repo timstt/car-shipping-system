@@ -134,8 +134,6 @@ CSS/                         Web project (ASTCUSA.csproj)
 ## Project management
 
 The project is planned and tracked in **Jira** and documented in **Confluence**.
-
-- Confluence (public page): [Car shipping system](https://timst2008.atlassian.net/wiki/external/ZmRiYWViMzIyZjkwNGZkM2IzZTU4MDc0YTUyYWQ5MmY)
 - Full Confluence export (PDF): [CSS-Confluence-export.pdf](docs/confluence/CSS-Confluence-export.pdf)
 
 ### Jira
