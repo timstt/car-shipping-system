@@ -4,8 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ASTCUSA.Models.Lab3
 {
-    // Прості класи-відображення таблиць бази astcusa_lab3 (лабораторна №3).
-    // Окремі від моделей лаби №2, щоб не впливати на Code First-базу ImportContext.
+    // Прості класи-відображення таблиць бази astcusa_lab3.
+    // Окремі від основних моделей, щоб не впливати на Code First-базу ImportContext.
     // Префікс Lab3 потрібен, щоб імена не збігалися з класами ASTCUSA.Models.
 
     // «abstract» User + Client / Manager / Logistician: одна таблиця, роль у стовпці Role

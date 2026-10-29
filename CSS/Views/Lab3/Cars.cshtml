@@ -1,12 +1,10 @@
 ﻿@using ASTCUSA.Models.Lab3
 @model CarsPage
 @{
-    ViewBag.Title = "БД і LINQ — авто";
+    ViewBag.Title = "Аналітика — авто";
 }
 
 @Html.Partial("_Lab3Nav")
-@Html.Partial("_QueryInfo", Model.Info)
-
 @using (Html.BeginForm("Cars", "Lab3", FormMethod.Get, new { @class = "card card-body mb-3" }))
 {
     @Html.ValidationSummary(true, "", new { @class = "text-danger" })

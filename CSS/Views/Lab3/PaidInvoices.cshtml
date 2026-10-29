@@ -1,15 +1,13 @@
 ﻿@using ASTCUSA.Models.Lab3
 @model PaidInvoicesPage
 @{
-    ViewBag.Title = "БД і LINQ — оплати за період";
+    ViewBag.Title = "Аналітика — оплати за період";
     // Список будується вручну: EnumDropDownListFor падає, якщо в рядку запиту невідоме значення періоду
     var periods = Enum.GetValues(typeof(PeriodType)).Cast<PeriodType>()
         .Select(p => new SelectListItem { Value = p.ToString(), Text = p.GetDisplayName() });
 }
 
 @Html.Partial("_Lab3Nav")
-@Html.Partial("_QueryInfo", Model.SummaryInfo)
-
 @using (Html.BeginForm("PaidInvoices", "Lab3", FormMethod.Get, new { @class = "card card-body mb-3" }))
 {
     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
@@ -29,7 +27,6 @@
             <button type="submit" class="btn btn-primary">Порахувати</button>
         </div>
     </div>
-    <div class="mt-2 small text-muted">Оплати в базі — з лютого по жовтень 2026 року (напр. місяць 10.2026, день 12.08.2026, перше півріччя 2026).</div>
 }
 
 @if (Model.Ran)
@@ -50,7 +47,6 @@
         </div>
     </div>
 
-    @Html.Partial("_QueryInfo", Model.ListInfo)
     <div class="table-responsive">
         <table class="table table-sm table-striped">
             <thead>

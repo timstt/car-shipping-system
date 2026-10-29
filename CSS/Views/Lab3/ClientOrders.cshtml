@@ -1,14 +1,12 @@
 ﻿@using ASTCUSA.Models.Lab3
 @model ClientOrdersPage
 @{
-    ViewBag.Title = "БД і LINQ — заявки клієнта";
+    ViewBag.Title = "Аналітика — заявки клієнта";
     var statuses = Enum.GetValues(typeof(OrderStatus)).Cast<OrderStatus>()
         .Select(s => new SelectListItem { Value = s.ToString(), Text = s.GetDisplayName(), Selected = Model.Status == s.ToString() });
 }
 
 @Html.Partial("_Lab3Nav")
-@Html.Partial("_QueryInfo", Model.Info)
-
 @using (Html.BeginForm("ClientOrders", "Lab3", FormMethod.Get, new { @class = "card card-body mb-3" }))
 {
     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
@@ -34,7 +32,6 @@
             <button type="submit" class="btn btn-primary">Знайти</button>
         </div>
     </div>
-    <div class="mt-2 small text-muted">Клієнти в базі: @string.Join(", ", Model.ClientEmails)</div>
 }
 
 @if (Model.Rows != null)

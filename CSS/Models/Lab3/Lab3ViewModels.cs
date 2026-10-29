@@ -4,32 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ASTCUSA.Models.Lab3
 {
-    // Опис запиту для сторінки: назва, що демонструє, LINQ-вираз і згенерований SQL
-    public class QueryInfo
-    {
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public string[] Kinds { get; set; }
-        public string Linq { get; set; }
-        public string Sql { get; set; }
-    }
-
-    public class TableCountRow
-    {
-        public string Table { get; set; }
-        public string Entity { get; set; }
-        public int Count { get; set; }
-    }
-
-    public class Lab3IndexPage
-    {
-        public string Server { get; set; }
-        public string Database { get; set; }
-        public QueryInfo Info { get; set; }
-        public IList<TableCountRow> Tables { get; set; }
-    }
-
-    // ---------- 1. Фільтр авто ----------
+    // ---------- Фільтр авто ----------
 
     public class CarFilterInput
     {
@@ -56,11 +31,10 @@ namespace ASTCUSA.Models.Lab3
 
     public class CarsPage : CarFilterInput
     {
-        public QueryInfo Info { get; set; }
         public IList<Lab3Car> Cars { get; set; }
     }
 
-    // ---------- 2. Заявки клієнта ----------
+    // ---------- Заявки клієнта ----------
 
     public class ClientOrdersInput
     {
@@ -76,8 +50,6 @@ namespace ASTCUSA.Models.Lab3
 
     public class ClientOrdersPage : ClientOrdersInput
     {
-        public QueryInfo Info { get; set; }
-        public bool Ran { get; set; }
         public IList<ClientOrderRow> Rows { get; set; }
         public IList<string> ClientEmails { get; set; }
     }
@@ -96,7 +68,7 @@ namespace ASTCUSA.Models.Lab3
         public string ManagerName { get; set; }
     }
 
-    // ---------- 3. Сума оплачених інвойсів за період ----------
+    // ---------- Сума оплачених інвойсів за період ----------
 
     public enum PeriodType
     {
@@ -139,8 +111,6 @@ namespace ASTCUSA.Models.Lab3
 
     public class PaidInvoicesPage : PaidInvoicesInput
     {
-        public QueryInfo SummaryInfo { get; set; }
-        public QueryInfo ListInfo { get; set; }
         public bool Ran { get; set; }
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
@@ -164,7 +134,7 @@ namespace ASTCUSA.Models.Lab3
         public DateTime? PaidAt { get; set; }
     }
 
-    // ---------- 4. Доставки ----------
+    // ---------- Доставки ----------
 
     public class DeliveriesInput
     {
@@ -177,7 +147,6 @@ namespace ASTCUSA.Models.Lab3
 
     public class DeliveriesPage : DeliveriesInput
     {
-        public QueryInfo Info { get; set; }
         public IList<string> Statuses { get; set; }
         public IList<DeliveryRow> Rows { get; set; }
     }
@@ -197,7 +166,7 @@ namespace ASTCUSA.Models.Lab3
         public string LogisticianName { get; set; }
     }
 
-    // ---------- 5. Групування ----------
+    // ---------- Групування ----------
 
     public class StatsInput
     {
@@ -208,7 +177,6 @@ namespace ASTCUSA.Models.Lab3
 
     public class StatsPage : StatsInput
     {
-        public QueryInfo Info { get; set; }
         public IList<GroupRow> Rows { get; set; }
     }
 
@@ -221,7 +189,7 @@ namespace ASTCUSA.Models.Lab3
         public decimal MaxCarPrice { get; set; }
     }
 
-    // ---------- 6. Керування страховками ----------
+    // ---------- Керування страховками ----------
 
     public class InsuranceInput
     {
@@ -244,8 +212,6 @@ namespace ASTCUSA.Models.Lab3
 
     public class InsurancesPage : InsuranceInput
     {
-        public QueryInfo ListInfo { get; set; }
-        public QueryInfo CrudInfo { get; set; }
         public IList<InsuranceRow> Rows { get; set; }
     }
 
@@ -259,7 +225,7 @@ namespace ASTCUSA.Models.Lab3
         public decimal Price { get; set; }
     }
 
-    // Українські назви статусів і ролей, що зберігаються в базі як імена перелічень лаби №2
+    // Українські назви статусів і ролей, що зберігаються в базі як імена перелічень OrderStatus / CarStatus / UserRole
     public static class Lab3Text
     {
         public static string OrderStatusName(string status)

@@ -10,7 +10,7 @@ namespace ASTCUSA.Models.Lab3
     // Створення бази astcusa_lab3 під час першого звернення до неї.
     // Виконує той самий скрипт docs/database/create_and_seed.sql, вбудований у збірку
     // як ресурс (див. ASTCUSA.csproj, EmbeddedResource). Якщо база й таблиці вже є,
-    // нічого не робить, тож дані, змінені на сторінці «БД і LINQ», зберігаються.
+    // нічого не робить, тож дані, змінені на сторінках аналітики, зберігаються.
     public static class Lab3Database
     {
         public const string ConnectionName = "Lab3Connection";
@@ -19,16 +19,6 @@ namespace ASTCUSA.Models.Lab3
 
         private static readonly object Sync = new object();
         private static volatile bool ready;
-
-        public static string DatabaseName
-        {
-            get { return new SqlConnectionStringBuilder(ConnectionString).InitialCatalog; }
-        }
-
-        public static string ServerName
-        {
-            get { return new SqlConnectionStringBuilder(ConnectionString).DataSource; }
-        }
 
         private static string ConnectionString
         {

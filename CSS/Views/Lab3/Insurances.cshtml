@@ -1,12 +1,10 @@
 ﻿@using ASTCUSA.Models.Lab3
 @model InsurancesPage
 @{
-    ViewBag.Title = "БД і LINQ — страховки";
+    ViewBag.Title = "Аналітика — страховки";
 }
 
 @Html.Partial("_Lab3Nav")
-@Html.Partial("_QueryInfo", Model.CrudInfo)
-
 @using (Html.BeginForm("CreateInsurance", "Lab3", FormMethod.Post, new { @class = "card card-body mb-3" }))
 {
     @Html.AntiForgeryToken()
@@ -17,8 +15,6 @@
         <button type="submit" class="btn btn-success">Додати</button>
     </div>
 }
-
-@Html.Partial("_QueryInfo", Model.ListInfo)
 
 <p class="text-muted">Усього страховок: @Model.Rows.Count</p>
 <div class="table-responsive">

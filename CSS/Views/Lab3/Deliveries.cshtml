@@ -1,7 +1,7 @@
 ﻿@using ASTCUSA.Models.Lab3
 @model DeliveriesPage
 @{
-    ViewBag.Title = "БД і LINQ — доставки";
+    ViewBag.Title = "Аналітика — доставки";
     var statuses = Model.Statuses.Select(s => new SelectListItem { Value = s, Text = s, Selected = Model.Status == s });
     var customs = new[]
     {
@@ -11,8 +11,6 @@
 }
 
 @Html.Partial("_Lab3Nav")
-@Html.Partial("_QueryInfo", Model.Info)
-
 @using (Html.BeginForm("Deliveries", "Lab3", FormMethod.Get, new { @class = "card card-body mb-3" }))
 {
     @Html.ValidationSummary(true, "", new { @class = "text-danger" })

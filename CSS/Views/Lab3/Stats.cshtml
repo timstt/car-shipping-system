@@ -1,13 +1,11 @@
 ﻿@using ASTCUSA.Models.Lab3
 @model StatsPage
 @{
-    ViewBag.Title = "БД і LINQ — групування";
+    ViewBag.Title = "Аналітика — групування";
     bool byMake = Model.GroupBy == "make";
 }
 
 @Html.Partial("_Lab3Nav")
-@Html.Partial("_QueryInfo", Model.Info)
-
 @using (Html.BeginForm("Stats", "Lab3", FormMethod.Get, new { @class = "card card-body mb-3" }))
 {
     @Html.ValidationSummary(false, "", new { @class = "text-danger" })

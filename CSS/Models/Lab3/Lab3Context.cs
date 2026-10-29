@@ -2,10 +2,6 @@
 
 namespace ASTCUSA.Models.Lab3
 {
-    // Контекст окремої бази astcusa_lab3 (лабораторна №3).
-    // Базу створює SQL-скрипт docs/database/create_and_seed.sql (див. Lab3Database),
-    // тому в Global.asax для цього контексту вимкнено ініціалізатор:
-    // Database.SetInitializer<Lab3Context>(null) — EF не створює й не змінює цю базу.
     public class Lab3Context : DbContext
     {
         // Ім'я рядка підключення з Web.config (<add name="Lab3Connection" .../>)
