@@ -3,32 +3,32 @@ using System.Linq;
 using System.Net;
 using System.Web.Mvc;
 using ASTCUSA.Models;
-using ASTCUSA.Models.Lab3;
+using ASTCUSA.Models.Analytics;
 
 namespace ASTCUSA.Controllers
 {
-    // Аналітика менеджера за окремою базою astcusa_lab3.
+    // Аналітика менеджера за окремою базою astcusa_analytics.
     // Запити лише читають дані (GET); страховки додаються, змінюються й видаляються
     // тільки через POST з антифорджері-токеном.
     [AllowRoles(UserRole.Manager)]
-    public class Lab3Controller : BaseController
+    public class AnalyticsController : BaseController
     {
-        private readonly Lab3Context lab3 = new Lab3Context();
-        private Lab3Queries queries;
+        private readonly AnalyticsContext analyticsContext = new AnalyticsContext();
+        private AnalyticsQueries queries;
 
         // Перед першим зверненням база створюється скриптом, якщо її ще немає
-        private Lab3Context Db3
+        private AnalyticsContext AnalyticsDb
         {
             get
             {
-                Lab3Database.EnsureCreated();
-                return lab3;
+                AnalyticsDatabase.EnsureCreated();
+                return analyticsContext;
             }
         }
 
-        private Lab3Queries Queries
+        private AnalyticsQueries Queries
         {
-            get { return queries ?? (queries = new Lab3Queries(Db3)); }
+            get { return queries ?? (queries = new AnalyticsQueries(AnalyticsDb)); }
         }
 
         // Форму запиту вже надіслано (у рядку запиту є параметри), а не просто відкрито сторінку
@@ -37,14 +37,14 @@ namespace ASTCUSA.Controllers
             get { return Request.QueryString.Count > 0; }
         }
 
-        // GET: Lab3 — перша вкладка розділу
+        // GET: Analytics — перша вкладка розділу
         [HttpGet]
         public ActionResult Index()
         {
             return RedirectToAction("Cars");
         }
 
-        // GET: Lab3/Cars — фільтр авто за маркою, роком і діапазоном ціни
+        // GET: Analytics/Cars — фільтр авто за маркою, роком і діапазоном ціни
         [HttpGet]
         public ActionResult Cars(CarsPage page)
         {
@@ -58,7 +58,7 @@ namespace ASTCUSA.Controllers
             return View(page);
         }
 
-        // GET: Lab3/ClientOrders — заявки клієнта за e-mail і статусом
+        // GET: Analytics/ClientOrders — заявки клієнта за e-mail і статусом
         [HttpGet]
         public ActionResult ClientOrders(ClientOrdersPage page)
         {
@@ -78,7 +78,7 @@ namespace ASTCUSA.Controllers
             return View(page);
         }
 
-        // GET: Lab3/PaidInvoices — сума й кількість оплачених інвойсів за день / місяць / півріччя
+        // GET: Analytics/PaidInvoices — сума й кількість оплачених інвойсів за день / місяць / півріччя
         [HttpGet]
         public ActionResult PaidInvoices(PaidInvoicesPage page)
         {
@@ -111,7 +111,7 @@ namespace ASTCUSA.Controllers
             return View(page);
         }
 
-        // GET: Lab3/Deliveries — доставки з даними заявки, авто, клієнта й логіста
+        // GET: Analytics/Deliveries — доставки з даними заявки, авто, клієнта й логіста
         [HttpGet]
         public ActionResult Deliveries(DeliveriesPage page)
         {
@@ -125,7 +125,7 @@ namespace ASTCUSA.Controllers
             return View(page);
         }
 
-        // GET: Lab3/Stats — кількість заявок і ціни авто з групуванням за статусом або маркою
+        // GET: Analytics/Stats — кількість заявок і ціни авто з групуванням за статусом або маркою
         [HttpGet]
         public ActionResult Stats(StatsPage page)
         {
@@ -166,14 +166,14 @@ namespace ASTCUSA.Controllers
                 ModelState.AddModelError("OrderId", "Заявку з таким номером не знайдено");
         }
 
-        // GET: Lab3/Insurances
+        // GET: Analytics/Insurances
         [HttpGet]
         public ActionResult Insurances()
         {
             return View(BuildInsurancesPage(new InsuranceInput()));
         }
 
-        // POST: Lab3/CreateInsurance — додавання
+        // POST: Analytics/CreateInsurance — додавання
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult CreateInsurance([Bind(Include = "OrderId,Type,Price")] InsuranceInput input)
@@ -181,24 +181,24 @@ namespace ASTCUSA.Controllers
             ValidateOrder(input);
             if (!ModelState.IsValid) return View("Insurances", BuildInsurancesPage(input));
 
-            var insurance = new Lab3Insurance
+            var insurance = new AnalyticsInsurance
             {
                 OrderId = input.OrderId.Value,
                 Type = input.Type.Trim(),
                 Price = input.Price.Value
             };
-            Db3.Insurances.Add(insurance);
-            Db3.SaveChanges();
+            AnalyticsDb.Insurances.Add(insurance);
+            AnalyticsDb.SaveChanges();
             TempData["Message"] = "Страховку №" + insurance.InsuranceId + " додано.";
             return RedirectToAction("Insurances");
         }
 
-        // GET: Lab3/EditInsurance/5
+        // GET: Analytics/EditInsurance/5
         [HttpGet]
         public ActionResult EditInsurance(int? id)
         {
             if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            var insurance = Db3.Insurances.Find(id.Value);
+            var insurance = AnalyticsDb.Insurances.Find(id.Value);
             if (insurance == null)
             {
                 TempData["Message"] = "Страховку не знайдено.";
@@ -214,12 +214,12 @@ namespace ASTCUSA.Controllers
             });
         }
 
-        // POST: Lab3/EditInsurance/5 — зміна
+        // POST: Analytics/EditInsurance/5 — зміна
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult EditInsurance([Bind(Include = "InsuranceId,OrderId,Type,Price")] InsuranceInput input)
         {
-            var insurance = input.InsuranceId.HasValue ? Db3.Insurances.Find(input.InsuranceId.Value) : null;
+            var insurance = input.InsuranceId.HasValue ? AnalyticsDb.Insurances.Find(input.InsuranceId.Value) : null;
             if (insurance == null)
             {
                 TempData["Message"] = "Страховку не знайдено.";
@@ -236,25 +236,25 @@ namespace ASTCUSA.Controllers
             insurance.OrderId = input.OrderId.Value;
             insurance.Type = input.Type.Trim();
             insurance.Price = input.Price.Value;
-            Db3.SaveChanges();
+            AnalyticsDb.SaveChanges();
             TempData["Message"] = "Страховку №" + insurance.InsuranceId + " змінено.";
             return RedirectToAction("Insurances");
         }
 
-        // POST: Lab3/DeleteInsurance/5 — видалення
+        // POST: Analytics/DeleteInsurance/5 — видалення
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteInsurance(int? id)
         {
-            var insurance = id.HasValue ? Db3.Insurances.Find(id.Value) : null;
+            var insurance = id.HasValue ? AnalyticsDb.Insurances.Find(id.Value) : null;
             if (insurance == null)
             {
                 TempData["Message"] = "Страховку не знайдено.";
             }
             else
             {
-                Db3.Insurances.Remove(insurance);
-                Db3.SaveChanges();
+                AnalyticsDb.Insurances.Remove(insurance);
+                AnalyticsDb.SaveChanges();
                 TempData["Message"] = "Страховку №" + id.Value + " видалено.";
             }
             return RedirectToAction("Insurances");
@@ -262,7 +262,7 @@ namespace ASTCUSA.Controllers
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) lab3.Dispose();
+            if (disposing) analyticsContext.Dispose();
             base.Dispose(disposing);
         }
     }

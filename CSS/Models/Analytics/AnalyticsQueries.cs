@@ -2,21 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ASTCUSA.Models.Lab3
+namespace ASTCUSA.Models.Analytics
 {
-    // Запити до бази astcusa_lab3 для сторінок аналітики менеджера
-    public class Lab3Queries
+    // Запити до бази astcusa_analytics для сторінок аналітики менеджера
+    public class AnalyticsQueries
     {
-        private readonly Lab3Context db;
+        private readonly AnalyticsContext db;
 
-        public Lab3Queries(Lab3Context db)
+        public AnalyticsQueries(AnalyticsContext db)
         {
             this.db = db;
         }
 
         // ---------- Фільтр авто за маркою, роком і ціною ----------
 
-        public IQueryable<Lab3Car> FilterCars(CarFilterInput filter)
+        public IQueryable<AnalyticsCar> FilterCars(CarFilterInput filter)
         {
             string make = (filter.Make ?? "").Trim();
             int? yearFrom = filter.YearFrom, yearTo = filter.YearTo;
@@ -189,7 +189,7 @@ namespace ASTCUSA.Models.Lab3
                         orderby o.OrderId
                         select new { o.OrderId, u.Name, c.Make, c.Model, o.Status }).ToList();
             return rows.Select(r => new KeyValuePair<int, string>(r.OrderId, string.Format("№{0} — {1}, {2} {3} ({4})",
-                r.OrderId, r.Name, r.Make, r.Model, Lab3Text.OrderStatusName(r.Status)))).ToList();
+                r.OrderId, r.Name, r.Make, r.Model, AnalyticsText.OrderStatusName(r.Status)))).ToList();
         }
     }
 }

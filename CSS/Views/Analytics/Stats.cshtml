@@ -1,12 +1,12 @@
-﻿@using ASTCUSA.Models.Lab3
+﻿@using ASTCUSA.Models.Analytics
 @model StatsPage
 @{
     ViewBag.Title = "Аналітика — групування";
     bool byMake = Model.GroupBy == "make";
 }
 
-@Html.Partial("_Lab3Nav")
-@using (Html.BeginForm("Stats", "Lab3", FormMethod.Get, new { @class = "card card-body mb-3" }))
+@Html.Partial("_AnalyticsNav")
+@using (Html.BeginForm("Stats", "Analytics", FormMethod.Get, new { @class = "card card-body mb-3" }))
 {
     @Html.ValidationSummary(false, "", new { @class = "text-danger" })
     <div class="d-flex flex-wrap gap-3 align-items-center">
@@ -37,7 +37,7 @@
                 @foreach (var r in Model.Rows)
                 {
                     <tr>
-                        <td>@(byMake ? r.Key : Lab3Text.OrderStatusName(r.Key))</td><td class="text-end">@r.OrdersCount</td>
+                        <td>@(byMake ? r.Key : AnalyticsText.OrderStatusName(r.Key))</td><td class="text-end">@r.OrdersCount</td>
                         <td class="text-end">@r.AvgCarPrice.ToString("N0")</td>
                         <td class="text-end">@r.MinCarPrice.ToString("N0")</td>
                         <td class="text-end">@r.MaxCarPrice.ToString("N0")</td>

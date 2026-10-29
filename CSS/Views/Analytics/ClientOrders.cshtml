@@ -1,4 +1,4 @@
-﻿@using ASTCUSA.Models.Lab3
+﻿@using ASTCUSA.Models.Analytics
 @model ClientOrdersPage
 @{
     ViewBag.Title = "Аналітика — заявки клієнта";
@@ -6,8 +6,8 @@
         .Select(s => new SelectListItem { Value = s.ToString(), Text = s.GetDisplayName(), Selected = Model.Status == s.ToString() });
 }
 
-@Html.Partial("_Lab3Nav")
-@using (Html.BeginForm("ClientOrders", "Lab3", FormMethod.Get, new { @class = "card card-body mb-3" }))
+@Html.Partial("_AnalyticsNav")
+@using (Html.BeginForm("ClientOrders", "Analytics", FormMethod.Get, new { @class = "card card-body mb-3" }))
 {
     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
     <div class="row g-2 align-items-start">
@@ -50,7 +50,7 @@
                         <td>@r.Make @r.Model (@r.Year)</td>
                         <td class="text-end">@r.MaxBudget.ToString("N0")</td>
                         <td class="text-end">@(r.FinalPrice.HasValue ? r.FinalPrice.Value.ToString("N0") : "—")</td>
-                        <td>@Lab3Text.OrderStatusName(r.Status)</td>
+                        <td>@AnalyticsText.OrderStatusName(r.Status)</td>
                         <td>@(r.ManagerName ?? "—")</td>
                     </tr>
                 }

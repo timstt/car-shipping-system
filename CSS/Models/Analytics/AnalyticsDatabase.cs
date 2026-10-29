@@ -5,17 +5,17 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace ASTCUSA.Models.Lab3
+namespace ASTCUSA.Models.Analytics
 {
-    // Створення бази astcusa_lab3 під час першого звернення до неї.
+    // Створення бази astcusa_analytics під час першого звернення до неї.
     // Виконує той самий скрипт docs/database/create_and_seed.sql, вбудований у збірку
     // як ресурс (див. ASTCUSA.csproj, EmbeddedResource). Якщо база й таблиці вже є,
     // нічого не робить, тож дані, змінені на сторінках аналітики, зберігаються.
-    public static class Lab3Database
+    public static class AnalyticsDatabase
     {
-        public const string ConnectionName = "Lab3Connection";
-        private const string ScriptResource = "ASTCUSA.Lab3.create_and_seed.sql";
-        private const string ScriptDatabaseName = "astcusa_lab3";
+        public const string ConnectionName = "AnalyticsConnection";
+        private const string ScriptResource = "ASTCUSA.Analytics.create_and_seed.sql";
+        private const string ScriptDatabaseName = "astcusa_analytics";
 
         private static readonly object Sync = new object();
         private static volatile bool ready;
@@ -86,7 +86,7 @@ namespace ASTCUSA.Models.Lab3
 
         private static string ReadScript()
         {
-            var stream = typeof(Lab3Database).Assembly.GetManifestResourceStream(ScriptResource);
+            var stream = typeof(AnalyticsDatabase).Assembly.GetManifestResourceStream(ScriptResource);
             if (stream == null)
                 throw new InvalidOperationException("У збірці немає вбудованого скрипта " + ScriptResource + ".");
             using (var reader = new StreamReader(stream, Encoding.UTF8, true))

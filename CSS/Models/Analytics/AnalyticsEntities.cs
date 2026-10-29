@@ -2,15 +2,15 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ASTCUSA.Models.Lab3
+namespace ASTCUSA.Models.Analytics
 {
-    // Прості класи-відображення таблиць бази astcusa_lab3.
+    // Прості класи-відображення таблиць бази astcusa_analytics.
     // Окремі від основних моделей, щоб не впливати на Code First-базу ImportContext.
-    // Префікс Lab3 потрібен, щоб імена не збігалися з класами ASTCUSA.Models.
+    // Префікс Analytics потрібен, щоб імена не збігалися з класами ASTCUSA.Models.
 
     // «abstract» User + Client / Manager / Logistician: одна таблиця, роль у стовпці Role
     [Table("Users")]
-    public class Lab3User
+    public class AnalyticsUser
     {
         [Key]
         public int Id { get; set; }
@@ -22,7 +22,7 @@ namespace ASTCUSA.Models.Lab3
     }
 
     [Table("Cars")]
-    public class Lab3Car
+    public class AnalyticsCar
     {
         [Key]
         public int CarId { get; set; }
@@ -35,7 +35,7 @@ namespace ASTCUSA.Models.Lab3
     }
 
     [Table("Orders")]
-    public class Lab3Order
+    public class AnalyticsOrder
     {
         [Key]
         public int OrderId { get; set; }
@@ -49,7 +49,7 @@ namespace ASTCUSA.Models.Lab3
     }
 
     [Table("Insurances")]
-    public class Lab3Insurance
+    public class AnalyticsInsurance
     {
         [Key]
         public int InsuranceId { get; set; }
@@ -59,7 +59,7 @@ namespace ASTCUSA.Models.Lab3
     }
 
     [Table("Invoices")]
-    public class Lab3Invoice
+    public class AnalyticsInvoice
     {
         [Key]
         public int InvoiceId { get; set; }
@@ -71,7 +71,7 @@ namespace ASTCUSA.Models.Lab3
 
     // Ключ доставки збігається з ключем заявки (Order 1 — 0..1 Delivery)
     [Table("Deliveries")]
-    public class Lab3Delivery
+    public class AnalyticsDelivery
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int OrderId { get; set; }

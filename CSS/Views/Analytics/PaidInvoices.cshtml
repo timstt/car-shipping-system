@@ -1,4 +1,4 @@
-﻿@using ASTCUSA.Models.Lab3
+﻿@using ASTCUSA.Models.Analytics
 @model PaidInvoicesPage
 @{
     ViewBag.Title = "Аналітика — оплати за період";
@@ -7,8 +7,8 @@
         .Select(p => new SelectListItem { Value = p.ToString(), Text = p.GetDisplayName() });
 }
 
-@Html.Partial("_Lab3Nav")
-@using (Html.BeginForm("PaidInvoices", "Lab3", FormMethod.Get, new { @class = "card card-body mb-3" }))
+@Html.Partial("_AnalyticsNav")
+@using (Html.BeginForm("PaidInvoices", "Analytics", FormMethod.Get, new { @class = "card card-body mb-3" }))
 {
     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
     <div class="row g-2 align-items-start">

@@ -1,11 +1,11 @@
-﻿@using ASTCUSA.Models.Lab3
+﻿@using ASTCUSA.Models.Analytics
 @model InsurancesPage
 @{
     ViewBag.Title = "Аналітика — страховки";
 }
 
-@Html.Partial("_Lab3Nav")
-@using (Html.BeginForm("CreateInsurance", "Lab3", FormMethod.Post, new { @class = "card card-body mb-3" }))
+@Html.Partial("_AnalyticsNav")
+@using (Html.BeginForm("CreateInsurance", "Analytics", FormMethod.Post, new { @class = "card card-body mb-3" }))
 {
     @Html.AntiForgeryToken()
     <h2 class="h6">Нова страховка</h2>
@@ -27,12 +27,12 @@
             {
                 <tr>
                     <td>@r.InsuranceId</td>
-                    <td>№@r.OrderId <small class="text-muted">(@Lab3Text.OrderStatusName(r.OrderStatus))</small></td>
+                    <td>№@r.OrderId <small class="text-muted">(@AnalyticsText.OrderStatusName(r.OrderStatus))</small></td>
                     <td>@r.ClientName</td><td>@r.Type</td>
                     <td class="text-end">@r.Price.ToString("N2")</td>
                     <td class="text-nowrap">
                         @Html.ActionLink("Змінити", "EditInsurance", new { id = r.InsuranceId }, new { @class = "btn btn-sm btn-outline-primary" })
-                        @using (Html.BeginForm("DeleteInsurance", "Lab3", new { id = r.InsuranceId }, FormMethod.Post, new { @class = "d-inline", onsubmit = "return confirm('Видалити страховку №" + r.InsuranceId + "?');" }))
+                        @using (Html.BeginForm("DeleteInsurance", "Analytics", new { id = r.InsuranceId }, FormMethod.Post, new { @class = "d-inline", onsubmit = "return confirm('Видалити страховку №" + r.InsuranceId + "?');" }))
                         {
                             @Html.AntiForgeryToken()
                             <button type="submit" class="btn btn-sm btn-outline-danger">Видалити</button>

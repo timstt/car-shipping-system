@@ -1,4 +1,4 @@
-﻿@using ASTCUSA.Models.Lab3
+﻿@using ASTCUSA.Models.Analytics
 @model DeliveriesPage
 @{
     ViewBag.Title = "Аналітика — доставки";
@@ -10,8 +10,8 @@
     };
 }
 
-@Html.Partial("_Lab3Nav")
-@using (Html.BeginForm("Deliveries", "Lab3", FormMethod.Get, new { @class = "card card-body mb-3" }))
+@Html.Partial("_AnalyticsNav")
+@using (Html.BeginForm("Deliveries", "Analytics", FormMethod.Get, new { @class = "card card-body mb-3" }))
 {
     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
     <div class="row g-2 align-items-start">
@@ -48,7 +48,7 @@
                         <td>@(r.IsCustomsCleared ? "так" : "ні")</td>
                         <td>@r.Make @r.Model<br /><small class="text-muted">@r.VinCode</small></td>
                         <td>@r.ClientName</td><td>@(r.LogisticianName ?? "—")</td>
-                        <td>@Lab3Text.OrderStatusName(r.OrderStatus)</td>
+                        <td>@AnalyticsText.OrderStatusName(r.OrderStatus)</td>
                     </tr>
                 }
                 @if (!Model.Rows.Any())

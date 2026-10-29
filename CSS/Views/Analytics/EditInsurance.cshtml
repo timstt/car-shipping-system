@@ -1,12 +1,12 @@
-﻿@using ASTCUSA.Models.Lab3
+﻿@using ASTCUSA.Models.Analytics
 @model InsuranceInput
 @{
     ViewBag.Title = "Аналітика — зміна страховки";
 }
 
-@Html.Partial("_Lab3Nav")
+@Html.Partial("_AnalyticsNav")
 
-@using (Html.BeginForm("EditInsurance", "Lab3", FormMethod.Post, new { @class = "card card-body mb-3" }))
+@using (Html.BeginForm("EditInsurance", "Analytics", FormMethod.Post, new { @class = "card card-body mb-3" }))
 {
     @Html.AntiForgeryToken()
     <h2 class="h5">Зміна страховки №@Model.InsuranceId</h2>

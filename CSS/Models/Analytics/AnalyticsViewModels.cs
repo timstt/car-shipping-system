@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace ASTCUSA.Models.Lab3
+namespace ASTCUSA.Models.Analytics
 {
     // ---------- Фільтр авто ----------
 
@@ -31,7 +31,7 @@ namespace ASTCUSA.Models.Lab3
 
     public class CarsPage : CarFilterInput
     {
-        public IList<Lab3Car> Cars { get; set; }
+        public IList<AnalyticsCar> Cars { get; set; }
     }
 
     // ---------- Заявки клієнта ----------
@@ -226,7 +226,7 @@ namespace ASTCUSA.Models.Lab3
     }
 
     // Українські назви статусів і ролей, що зберігаються в базі як імена перелічень OrderStatus / CarStatus / UserRole
-    public static class Lab3Text
+    public static class AnalyticsText
     {
         public static string OrderStatusName(string status)
         {

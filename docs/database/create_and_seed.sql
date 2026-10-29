@@ -1,5 +1,5 @@
 ﻿/*
-    Лабораторна робота №3 — окрема локальна база даних astcusa_lab3
+    Окрема локальна база даних astcusa_analytics
     (Система перевезення авто зі США).
 
     Скрипт створює базу (якщо її немає), 6 таблиць за діаграмою класів
@@ -7,21 +7,21 @@
 
     Скрипт ідемпотентний: під час повторного запуску таблиці видаляються,
     створюються заново й знову заповнюються тими самими даними (зміни, зроблені
-    на сторінці «БД і LINQ», при цьому скидаються).
+    на сторінці «Аналітика», при цьому скидаються).
 
     Запуск:
       • Visual Studio: SQL Server Object Explorer → (localdb)\MSSQLLocalDB → New Query → вставити скрипт → Execute;
       • командний рядок: sqlcmd -S "(localdb)\MSSQLLocalDB" -E -i create_and_seed.sql;
       • застосунок виконує цей самий скрипт автоматично під час першого відкриття сторінки
-        «БД і LINQ», якщо бази ще немає (див. Models/Lab3/Lab3Database.cs).
+        «Аналітика», якщо бази ще немає (див. Models/Analytics/AnalyticsDatabase.cs).
 */
 SET NOCOUNT ON;
 
-IF DB_ID(N'astcusa_lab3') IS NULL
-    CREATE DATABASE [astcusa_lab3];
+IF DB_ID(N'astcusa_analytics') IS NULL
+    CREATE DATABASE [astcusa_analytics];
 GO
 
-USE [astcusa_lab3];
+USE [astcusa_analytics];
 GO
 
 -- Видалення таблиць у порядку, зворотному до залежностей (для повторного запуску)
