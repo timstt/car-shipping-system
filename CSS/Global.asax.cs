@@ -18,11 +18,6 @@ namespace ASTCUSA
             // тому ініціалізатор для AnalyticsContext вимкнено — EF не створює й не змінює цю базу
             Database.SetInitializer<AnalyticsContext>(null);
 
-            // Українські тексти стандартних повідомлень MVC з App_GlobalResources/ValidationMessages.resx:
-            // «некоректне значення» (сервер) і «має бути числом / датою» (клієнт)
-            DefaultModelBinder.ResourceClassKey = "ValidationMessages";
-            ClientDataTypeModelValidatorProvider.ResourceClassKey = "ValidationMessages";
-
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
