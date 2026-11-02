@@ -1,0 +1,39 @@
+@using ASTCUSA.Models.Analytics
+@model IList<AnalyticsUser>
+@{
+    ViewBag.Title = "Аналітика — користувачі";
+}
+
+@Html.Partial("_AnalyticsNav")
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <span class="text-muted">Усього користувачів: @Model.Count</span>
+    @Html.ActionLink("Додати користувача", "CreateUser", null, new { @class = "btn btn-success" })
+</div>
+<div class="table-responsive">
+    <table class="table table-sm table-striped align-middle">
+        <thead>
+            <tr><th>ID</th><th>Ім'я</th><th>E-mail</th><th>Роль</th><th>Телефон</th><th>Адреса</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var u in Model)
+            {
+                <tr>
+                    <td>@u.Id</td><td>@u.Name</td><td>@u.Email</td><td>@AnalyticsText.RoleName(u.Role)</td>
+                    <td>@u.PhoneNumber</td><td>@u.Address</td>
+                    <td class="text-nowrap">
+                        @Html.ActionLink("Змінити", "EditUser", new { id = u.Id }, new { @class = "btn btn-sm btn-outline-primary" })
+                        @using (Html.BeginForm("DeleteUser", "Analytics", new { id = u.Id }, FormMethod.Post, new { @class = "d-inline", onsubmit = "return confirm('Видалити користувача №" + u.Id + "?');" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Видалити</button>
+                        }
+                    </td>
+                </tr>
+            }
+            @if (!Model.Any())
+            {
+                <tr><td colspan="7" class="text-muted">Користувачів немає</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

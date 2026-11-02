@@ -68,13 +68,15 @@ Besides the main database used by the app (EF Code First), the project has a **s
 - **6 tables**: `Users`, `Cars`, `Orders`, `Insurances`, `Invoices`, `Deliveries`; 7 foreign keys, unique and check constraints, 12-26 seeded rows per table.
 - Created by an idempotent T-SQL script. The site runs it automatically on the first visit to the **Analytics** section if the database does not exist.
 - Accessed through a second `DbContext` with its own connection string in `CSS/Web.config`, independent from the main one.
-- The **Analytics** section is available to the Manager only. Its tabs:
+- The **Analytics** section is available to the Manager only. Its **query** tabs:
   - **Cars** — filter by make, year range and price.
   - **Client orders** — orders of a client by e-mail and status.
   - **Payments for a period** — sum and count of paid invoices for a chosen day, month or half-year.
   - **Deliveries** — by delivery status and customs state.
   - **Grouping** — order count and car prices grouped by order status or car make.
-  - **Insurances** — add, edit and delete insurances.
+- **Table management** tabs: add, edit and delete records in every table — `Users`, `Cars`, `Orders`, `Insurances`, `Invoices`, `Deliveries`.
+  - Forms check the same rules as the database: unique e-mail / VIN / tracking number, one invoice and one delivery per order, client / manager / logistician chosen by role, a paid invoice must have a payment date.
+  - A record that other records depend on cannot be deleted: a user or car linked to orders, or an order that has insurances, an invoice or a delivery. The page says which records block the deletion.
 
 ## Getting started
 

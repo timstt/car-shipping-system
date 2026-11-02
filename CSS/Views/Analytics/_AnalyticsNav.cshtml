@@ -1,14 +1,40 @@
 ﻿@{
     string current = (string)ViewContext.RouteData.Values["action"];
-    Func<string, string> cls = a => "nav-link" + (string.Equals(current, a, StringComparison.OrdinalIgnoreCase)
-        || (a == "Insurances" && string.Equals(current, "EditInsurance", StringComparison.OrdinalIgnoreCase)) ? " active" : "");
+
+    // Вкладка активна, якщо поточна дія — її сторінка або форма додавання / зміни її запису
+    var groups = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
+    {
+        { "Insurances", new[] { "Insurances", "CreateInsurance", "EditInsurance" } },
+        { "UsersTable", new[] { "UsersTable", "CreateUser", "EditUser" } },
+        { "CarsTable", new[] { "CarsTable", "CreateCar", "EditCar" } },
+        { "OrdersTable", new[] { "OrdersTable", "CreateOrder", "EditOrder" } },
+        { "InvoicesTable", new[] { "InvoicesTable", "CreateInvoice", "EditInvoice" } },
+        { "DeliveriesTable", new[] { "DeliveriesTable", "CreateDelivery", "EditDelivery" } }
+    };
+    Func<string, string> cls = a =>
+    {
+        string[] actions;
+        bool active = groups.TryGetValue(a, out actions)
+            ? actions.Contains(current, StringComparer.OrdinalIgnoreCase)
+            : string.Equals(current, a, StringComparison.OrdinalIgnoreCase);
+        return "nav-link" + (active ? " active" : "");
+    };
 }
 <h1 class="h3 mb-3">Аналітика</h1>
+<div class="small text-muted mb-1">Запити</div>
 <ul class="nav nav-tabs mb-3 flex-wrap">
     <li class="nav-item">@Html.ActionLink("Авто", "Cars", "Analytics", null, new { @class = cls("Cars") })</li>
     <li class="nav-item">@Html.ActionLink("Заявки клієнта", "ClientOrders", "Analytics", null, new { @class = cls("ClientOrders") })</li>
     <li class="nav-item">@Html.ActionLink("Оплати за період", "PaidInvoices", "Analytics", null, new { @class = cls("PaidInvoices") })</li>
     <li class="nav-item">@Html.ActionLink("Доставки", "Deliveries", "Analytics", null, new { @class = cls("Deliveries") })</li>
     <li class="nav-item">@Html.ActionLink("Групування", "Stats", "Analytics", null, new { @class = cls("Stats") })</li>
+</ul>
+<div class="small text-muted mb-1">Керування таблицями (додавання, зміна, видалення)</div>
+<ul class="nav nav-pills mb-3 flex-wrap">
+    <li class="nav-item">@Html.ActionLink("Користувачі", "UsersTable", "Analytics", null, new { @class = cls("UsersTable") })</li>
+    <li class="nav-item">@Html.ActionLink("Авто", "CarsTable", "Analytics", null, new { @class = cls("CarsTable") })</li>
+    <li class="nav-item">@Html.ActionLink("Заявки", "OrdersTable", "Analytics", null, new { @class = cls("OrdersTable") })</li>
     <li class="nav-item">@Html.ActionLink("Страховки", "Insurances", "Analytics", null, new { @class = cls("Insurances") })</li>
+    <li class="nav-item">@Html.ActionLink("Інвойси", "InvoicesTable", "Analytics", null, new { @class = cls("InvoicesTable") })</li>
+    <li class="nav-item">@Html.ActionLink("Доставки", "DeliveriesTable", "Analytics", null, new { @class = cls("DeliveriesTable") })</li>
 </ul>

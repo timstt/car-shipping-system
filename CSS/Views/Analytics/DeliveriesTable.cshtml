@@ -1,0 +1,40 @@
+@using ASTCUSA.Models.Analytics
+@model IList<DeliveryTableRow>
+@{
+    ViewBag.Title = "Аналітика — таблиця доставок";
+}
+
+@Html.Partial("_AnalyticsNav")
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <span class="text-muted">Усього доставок: @Model.Count</span>
+    @Html.ActionLink("Додати доставку", "CreateDelivery", null, new { @class = "btn btn-success" })
+</div>
+<div class="table-responsive">
+    <table class="table table-sm table-striped align-middle">
+        <thead>
+            <tr><th>Заявка</th><th>Клієнт</th><th>Логіст</th><th>Номер відстеження</th><th>Місцезнаходження</th><th>Митниця</th><th>Статус</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var d in Model)
+            {
+                <tr>
+                    <td>№@d.OrderId</td><td>@d.ClientName</td><td>@(d.LogisticianName ?? "—")</td>
+                    <td><code>@d.TrackingNumber</code></td><td>@(d.CurrentLocation ?? "—")</td>
+                    <td>@(d.IsCustomsCleared ? "пройдено" : "ні")</td><td>@d.Status</td>
+                    <td class="text-nowrap">
+                        @Html.ActionLink("Змінити", "EditDelivery", new { id = d.OrderId }, new { @class = "btn btn-sm btn-outline-primary" })
+                        @using (Html.BeginForm("DeleteDelivery", "Analytics", new { id = d.OrderId }, FormMethod.Post, new { @class = "d-inline", onsubmit = "return confirm('Видалити доставку для заявки №" + d.OrderId + "?');" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Видалити</button>
+                        }
+                    </td>
+                </tr>
+            }
+            @if (!Model.Any())
+            {
+                <tr><td colspan="8" class="text-muted">Доставок немає</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

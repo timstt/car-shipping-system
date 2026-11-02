@@ -1,0 +1,41 @@
+@using ASTCUSA.Models.Analytics
+@model IList<InvoiceTableRow>
+@{
+    ViewBag.Title = "Аналітика — таблиця інвойсів";
+}
+
+@Html.Partial("_AnalyticsNav")
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <span class="text-muted">Усього інвойсів: @Model.Count</span>
+    @Html.ActionLink("Додати інвойс", "CreateInvoice", null, new { @class = "btn btn-success" })
+</div>
+<div class="table-responsive">
+    <table class="table table-sm table-striped align-middle">
+        <thead>
+            <tr><th>ID</th><th>Заявка</th><th>Клієнт</th><th class="text-end">Сума, $</th><th>Оплачено</th><th>Дата оплати</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var i in Model)
+            {
+                <tr>
+                    <td>@i.InvoiceId</td><td>№@i.OrderId</td><td>@i.ClientName</td>
+                    <td class="text-end">@i.TotalAmount.ToString("N2")</td>
+                    <td>@(i.IsPaid ? "так" : "ні")</td>
+                    <td>@(i.PaidAt.HasValue ? i.PaidAt.Value.ToString("dd.MM.yyyy") : "—")</td>
+                    <td class="text-nowrap">
+                        @Html.ActionLink("Змінити", "EditInvoice", new { id = i.InvoiceId }, new { @class = "btn btn-sm btn-outline-primary" })
+                        @using (Html.BeginForm("DeleteInvoice", "Analytics", new { id = i.InvoiceId }, FormMethod.Post, new { @class = "d-inline", onsubmit = "return confirm('Видалити інвойс №" + i.InvoiceId + "?');" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Видалити</button>
+                        }
+                    </td>
+                </tr>
+            }
+            @if (!Model.Any())
+            {
+                <tr><td colspan="7" class="text-muted">Інвойсів немає</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

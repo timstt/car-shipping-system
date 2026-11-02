@@ -133,10 +133,17 @@
     <Compile Include="Controllers\OrdersController.cs" />
     <Compile Include="Controllers\ReportsController.cs" />
     <Compile Include="Controllers\AnalyticsController.cs" />
+    <Compile Include="Controllers\AnalyticsController.Tables.cs" />
+    <Compile Include="Controllers\AnalyticsController.Users.cs" />
+    <Compile Include="Controllers\AnalyticsController.CarsTable.cs" />
+    <Compile Include="Controllers\AnalyticsController.Orders.cs" />
+    <Compile Include="Controllers\AnalyticsController.Invoices.cs" />
+    <Compile Include="Controllers\AnalyticsController.DeliveriesTable.cs" />
     <Compile Include="Models\Analytics\AnalyticsContext.cs" />
     <Compile Include="Models\Analytics\AnalyticsDatabase.cs" />
     <Compile Include="Models\Analytics\AnalyticsEntities.cs" />
     <Compile Include="Models\Analytics\AnalyticsQueries.cs" />
+    <Compile Include="Models\Analytics\AnalyticsTableModels.cs" />
     <Compile Include="Models\Analytics\AnalyticsViewModels.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\AuthTicket.cs" />
@@ -239,6 +246,16 @@
     <Content Include="Views\Analytics\Stats.cshtml" />
     <Content Include="Views\Analytics\Insurances.cshtml" />
     <Content Include="Views\Analytics\EditInsurance.cshtml" />
+    <Content Include="Views\Analytics\UsersTable.cshtml" />
+    <Content Include="Views\Analytics\UserForm.cshtml" />
+    <Content Include="Views\Analytics\CarsTable.cshtml" />
+    <Content Include="Views\Analytics\CarForm.cshtml" />
+    <Content Include="Views\Analytics\OrdersTable.cshtml" />
+    <Content Include="Views\Analytics\OrderForm.cshtml" />
+    <Content Include="Views\Analytics\InvoicesTable.cshtml" />
+    <Content Include="Views\Analytics\InvoiceForm.cshtml" />
+    <Content Include="Views\Analytics\DeliveriesTable.cshtml" />
+    <Content Include="Views\Analytics\DeliveryForm.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <!-- SQL-скрипт створення бази astcusa_analytics вбудовано в збірку, AnalyticsDatabase виконує його під час першого запуску -->

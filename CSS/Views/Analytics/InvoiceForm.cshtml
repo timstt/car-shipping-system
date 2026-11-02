@@ -1,0 +1,50 @@
+@using ASTCUSA.Models.Analytics
+@model InvoiceInput
+@{
+    bool isNew = !Model.InvoiceId.HasValue;
+    ViewBag.Title = isNew ? "Аналітика — новий інвойс" : "Аналітика — зміна інвойсу";
+}
+
+@Html.Partial("_AnalyticsNav")
+
+@using (Html.BeginForm(isNew ? "CreateInvoice" : "EditInvoice", "Analytics", FormMethod.Post, new { @class = "card card-body mb-3" }))
+{
+    @Html.AntiForgeryToken()
+    <h2 class="h5">@(isNew ? "Новий інвойс" : "Зміна інвойсу №" + Model.InvoiceId)</h2>
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    if (!isNew)
+    {
+        @Html.HiddenFor(m => m.InvoiceId)
+    }
+    <div class="row g-2 align-items-start">
+        <div class="col-md-6">
+            @Html.LabelFor(m => m.OrderId, new { @class = "form-label small" })
+            @Html.DropDownListFor(m => m.OrderId, (SelectList)ViewBag.Orders, "— оберіть заявку —", new { @class = "form-select" })
+            @Html.ValidationMessageFor(m => m.OrderId, "", new { @class = "text-danger small" })
+            <div class="form-text">У списку лише заявки без інвойсу.</div>
+        </div>
+        <div class="col-md-3">
+            @Html.LabelFor(m => m.TotalAmount, new { @class = "form-label small" })
+            @Html.TextBoxFor(m => m.TotalAmount, new { @class = "form-control", inputmode = "decimal" })
+            @Html.ValidationMessageFor(m => m.TotalAmount, "", new { @class = "text-danger small" })
+        </div>
+        <div class="col-md-3">
+            @Html.LabelFor(m => m.PaidAt, new { @class = "form-label small" })
+            @Html.TextBoxFor(m => m.PaidAt, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+            @Html.ValidationMessageFor(m => m.PaidAt, "", new { @class = "text-danger small" })
+            <div class="form-check mt-2">
+                @Html.CheckBoxFor(m => m.IsPaid, new { @class = "form-check-input" })
+                @Html.LabelFor(m => m.IsPaid, new { @class = "form-check-label" })
+            </div>
+            <div class="form-text">Дата потрібна лише для оплаченого інвойсу.</div>
+        </div>
+    </div>
+    <div class="mt-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">@(isNew ? "Додати" : "Зберегти")</button>
+        @Html.ActionLink("Скасувати", "InvoicesTable", null, new { @class = "btn btn-outline-secondary" })
+    </div>
+}
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

@@ -1,0 +1,39 @@
+@using ASTCUSA.Models.Analytics
+@model IList<AnalyticsCar>
+@{
+    ViewBag.Title = "Аналітика — таблиця авто";
+}
+
+@Html.Partial("_AnalyticsNav")
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <span class="text-muted">Усього авто: @Model.Count</span>
+    @Html.ActionLink("Додати авто", "CreateCar", null, new { @class = "btn btn-success" })
+</div>
+<div class="table-responsive">
+    <table class="table table-sm table-striped align-middle">
+        <thead>
+            <tr><th>ID</th><th>VIN</th><th>Марка</th><th>Модель</th><th>Рік</th><th class="text-end">Ціна, $</th><th>Статус</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var c in Model)
+            {
+                <tr>
+                    <td>@c.CarId</td><td><code>@c.VinCode</code></td><td>@c.Make</td><td>@c.Model</td><td>@c.Year</td>
+                    <td class="text-end">@c.AuctionPrice.ToString("N2")</td><td>@AnalyticsText.CarStatusName(c.Status)</td>
+                    <td class="text-nowrap">
+                        @Html.ActionLink("Змінити", "EditCar", new { id = c.CarId }, new { @class = "btn btn-sm btn-outline-primary" })
+                        @using (Html.BeginForm("DeleteCar", "Analytics", new { id = c.CarId }, FormMethod.Post, new { @class = "d-inline", onsubmit = "return confirm('Видалити авто №" + c.CarId + "?');" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Видалити</button>
+                        }
+                    </td>
+                </tr>
+            }
+            @if (!Model.Any())
+            {
+                <tr><td colspan="8" class="text-muted">Авто немає</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

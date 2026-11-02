@@ -8,10 +8,10 @@ using ASTCUSA.Models.Analytics;
 namespace ASTCUSA.Controllers
 {
     // Аналітика менеджера за окремою базою astcusa_analytics.
-    // Запити лише читають дані (GET); страховки додаються, змінюються й видаляються
-    // тільки через POST з антифорджері-токеном.
+    // Запити лише читають дані (GET). Записи всіх таблиць додаються, змінюються й видаляються
+    // тільки через POST з антифорджері-токеном (страховки — тут, інші таблиці — у файлах AnalyticsController.*.cs).
     [AllowRoles(UserRole.Manager)]
-    public class AnalyticsController : BaseController
+    public partial class AnalyticsController : BaseController
     {
         private readonly AnalyticsContext analyticsContext = new AnalyticsContext();
         private AnalyticsQueries queries;

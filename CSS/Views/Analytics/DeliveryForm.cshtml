@@ -1,0 +1,74 @@
+@using ASTCUSA.Models.Analytics
+@model DeliveryInput
+@{
+    bool isNew = (bool)ViewBag.IsNew;
+    ViewBag.Title = isNew ? "Аналітика — нова доставка" : "Аналітика — зміна доставки";
+    var statuses = (IList<string>)ViewBag.DeliveryStatuses;
+}
+
+@Html.Partial("_AnalyticsNav")
+
+@using (isNew
+    ? Html.BeginForm("CreateDelivery", "Analytics", FormMethod.Post, new { @class = "card card-body mb-3" })
+    : Html.BeginForm("EditDelivery", "Analytics", new { id = Model.OrderId }, FormMethod.Post, new { @class = "card card-body mb-3" }))
+{
+    @Html.AntiForgeryToken()
+    <h2 class="h5">@(isNew ? "Нова доставка" : "Зміна доставки для заявки №" + Model.OrderId)</h2>
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    <div class="row g-2 align-items-start">
+        <div class="col-md-6">
+            @Html.LabelFor(m => m.OrderId, new { @class = "form-label small" })
+            @if (isNew)
+            {
+                @Html.DropDownListFor(m => m.OrderId, (SelectList)ViewBag.Orders, "— оберіть заявку —", new { @class = "form-select" })
+                @Html.ValidationMessageFor(m => m.OrderId, "", new { @class = "text-danger small" })
+                <div class="form-text">У списку лише заявки без доставки.</div>
+            }
+            else
+            {
+                <input type="text" class="form-control" value="@ViewBag.OrderText" readonly />
+                <div class="form-text">Номер заявки — ключ доставки, його не можна змінити.</div>
+            }
+        </div>
+        <div class="col-md-6">
+            @Html.LabelFor(m => m.LogisticianId, new { @class = "form-label small" })
+            @Html.DropDownListFor(m => m.LogisticianId, (SelectList)ViewBag.Logisticians, "— не призначено —", new { @class = "form-select" })
+            @Html.ValidationMessageFor(m => m.LogisticianId, "", new { @class = "text-danger small" })
+        </div>
+        <div class="col-md-4">
+            @Html.LabelFor(m => m.TrackingNumber, new { @class = "form-label small" })
+            @Html.TextBoxFor(m => m.TrackingNumber, new { @class = "form-control", placeholder = "напр. TRK-2026-0001" })
+            @Html.ValidationMessageFor(m => m.TrackingNumber, "", new { @class = "text-danger small" })
+        </div>
+        <div class="col-md-4">
+            @Html.LabelFor(m => m.CurrentLocation, new { @class = "form-label small" })
+            @Html.TextBoxFor(m => m.CurrentLocation, new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.CurrentLocation, "", new { @class = "text-danger small" })
+        </div>
+        <div class="col-md-4">
+            @Html.LabelFor(m => m.Status, new { @class = "form-label small" })
+            @Html.TextBoxFor(m => m.Status, new { @class = "form-control", list = "delivery-statuses" })
+            <datalist id="delivery-statuses">
+                @foreach (var s in statuses)
+                {
+                    <option value="@s"></option>
+                }
+            </datalist>
+            @Html.ValidationMessageFor(m => m.Status, "", new { @class = "text-danger small" })
+        </div>
+        <div class="col-12">
+            <div class="form-check">
+                @Html.CheckBoxFor(m => m.IsCustomsCleared, new { @class = "form-check-input" })
+                @Html.LabelFor(m => m.IsCustomsCleared, new { @class = "form-check-label" })
+            </div>
+        </div>
+    </div>
+    <div class="mt-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">@(isNew ? "Додати" : "Зберегти")</button>
+        @Html.ActionLink("Скасувати", "DeliveriesTable", null, new { @class = "btn btn-outline-secondary" })
+    </div>
+}
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
