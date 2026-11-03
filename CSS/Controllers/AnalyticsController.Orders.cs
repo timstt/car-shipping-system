@@ -48,7 +48,7 @@ namespace ASTCUSA.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult CreateOrder([Bind(Include = "ClientId,ManagerId,CarId,MaxBudget,FinalPrice,Status,CreatedAt")] OrderInput input)
         {
-            ValidateOrderInput(input);
+            ValidateOrderInput(input, null);
             if (!ModelState.IsValid) return OrderForm(input);
 
             var order = new AnalyticsOrder();
@@ -88,7 +88,14 @@ namespace ASTCUSA.Controllers
             var order = input.OrderId.HasValue ? AnalyticsDb.Orders.Find(input.OrderId.Value) : null;
             if (order == null) return NotFoundRedirect("Заявку не знайдено.", "OrdersTable");
 
-            ValidateOrderInput(input);
+            // Завершена заявка — закрита історія: змінити в ній нічого не можна
+            if (order.Status == OrderStatus.Completed.ToString())
+            {
+                ModelState.AddModelError("", "Завершену заявку змінити не можна");
+                return OrderForm(input);
+            }
+
+            ValidateOrderInput(input, order);
             if (!ModelState.IsValid) return OrderForm(input);
 
             CopyOrder(input, order);
@@ -105,6 +112,12 @@ namespace ASTCUSA.Controllers
         {
             var order = id.HasValue ? AnalyticsDb.Orders.Find(id.Value) : null;
             if (order == null) return NotFoundRedirect("Заявку не знайдено.", "OrdersTable");
+
+            if (order.Status == OrderStatus.Completed.ToString())
+            {
+                TempData["Message"] = "Заявку №" + order.OrderId + " не можна видалити: її вже завершено.";
+                return RedirectToAction("OrdersTable");
+            }
 
             var blockers = new List<string>();
             int insurances = AnalyticsDb.Insurances.Count(i => i.OrderId == order.OrderId);
@@ -137,8 +150,14 @@ namespace ASTCUSA.Controllers
             return View("OrderForm", input);
         }
 
-        private void ValidateOrderInput(OrderInput input)
+        private void ValidateOrderInput(OrderInput input, AnalyticsOrder existing)
         {
+            // Оплачену заявку (є оплачений інвойс чи доставка) не можна повернути до неоплаченого статусу
+            if (existing != null && input.Status != null && !PaidOrderStatuses.Contains(input.Status)
+                && (AnalyticsDb.Deliveries.Any(d => d.OrderId == existing.OrderId)
+                    || AnalyticsDb.Invoices.Any(i => i.OrderId == existing.OrderId && i.IsPaid)))
+                ModelState.AddModelError("Status", "Заявку вже оплачено: її статус може бути лише " + PaidOrderStatusNames());
+
             if (!string.IsNullOrEmpty(input.Status) && !AnalyticsChoices.IsEnumName<OrderStatus>(input.Status))
                 ModelState.AddModelError("Status", "Невідомий статус заявки");
             if (input.ClientId.HasValue && !UserHasRole(input.ClientId, UserRole.Client))

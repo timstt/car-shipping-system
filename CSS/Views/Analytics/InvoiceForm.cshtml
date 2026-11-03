@@ -36,6 +36,7 @@
                 @Html.CheckBoxFor(m => m.IsPaid, new { @class = "form-check-input" })
                 @Html.LabelFor(m => m.IsPaid, new { @class = "form-check-label" })
             </div>
+            @Html.ValidationMessageFor(m => m.IsPaid, "", new { @class = "text-danger small" })
             <div class="form-text">Дата потрібна лише для оплаченого інвойсу.</div>
         </div>
     </div>

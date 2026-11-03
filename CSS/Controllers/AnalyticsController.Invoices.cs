@@ -88,13 +88,19 @@ namespace ASTCUSA.Controllers
             return RedirectToAction("InvoicesTable");
         }
 
-        // POST: Analytics/DeleteInvoice/5 — на інвойс ніщо не посилається, тож його можна видалити завжди
+        // POST: Analytics/DeleteInvoice/5 — оплачений інвойс (запис про отримані гроші) видалити не можна
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteInvoice(int? id)
         {
             var invoice = id.HasValue ? AnalyticsDb.Invoices.Find(id.Value) : null;
             if (invoice == null) return NotFoundRedirect("Інвойс не знайдено.", "InvoicesTable");
+
+            if (invoice.IsPaid)
+            {
+                TempData["Message"] = "Інвойс №" + invoice.InvoiceId + " не можна видалити: його вже оплачено.";
+                return RedirectToAction("InvoicesTable");
+            }
 
             AnalyticsDb.Invoices.Remove(invoice);
             TempData["Message"] = TrySave("")
@@ -125,6 +131,18 @@ namespace ASTCUSA.Controllers
                     ModelState.AddModelError("OrderId", "Заявку з таким номером не знайдено");
                 else if (AnalyticsDb.Invoices.Any(i => i.OrderId == orderId && i.InvoiceId != ownId))
                     ModelState.AddModelError("OrderId", "Для цієї заявки інвойс уже є");
+            }
+
+            // Оплачений інвойс не можна «розоплатити», перенести на іншу заявку чи змінити суму,
+            // інакше обмеження на видалення можна було б обійти через редагування
+            if (existing != null && existing.IsPaid)
+            {
+                if (!input.IsPaid)
+                    ModelState.AddModelError("IsPaid", "Оплату не можна скасувати: інвойс уже оплачено");
+                if (input.OrderId.HasValue && input.OrderId.Value != existing.OrderId)
+                    ModelState.AddModelError("OrderId", "Заявку оплаченого інвойсу змінити не можна");
+                if (input.TotalAmount.HasValue && input.TotalAmount.Value != existing.TotalAmount)
+                    ModelState.AddModelError("TotalAmount", "Суму оплаченого інвойсу змінити не можна");
             }
 
             if (input.IsPaid && !input.PaidAt.HasValue && ModelState.IsValidField("PaidAt"))

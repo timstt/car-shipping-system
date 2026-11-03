@@ -160,10 +160,24 @@ namespace ASTCUSA.Controllers
             return new SelectList(Queries.OrderChoices(), "Key", "Value", selected);
         }
 
-        private void ValidateOrder(InsuranceInput input)
+        // Страховка входить у вартість заявки, тому після оплати чи завершення заявки
+        // її не можна додати, змінити, перенести чи видалити
+        private void ValidateInsurance(InsuranceInput input, AnalyticsInsurance existing)
         {
-            if (input.OrderId.HasValue && ModelState.IsValidField("OrderId") && !Queries.OrderExists(input.OrderId.Value))
-                ModelState.AddModelError("OrderId", "Заявку з таким номером не знайдено");
+            if (existing != null && IsOrderPaidOrCompleted(existing.OrderId))
+            {
+                ModelState.AddModelError("", "Страховку заявки №" + existing.OrderId
+                    + " змінити не можна: заявку вже оплачено або завершено");
+                return;
+            }
+
+            if (input.OrderId.HasValue && ModelState.IsValidField("OrderId"))
+            {
+                if (!Queries.OrderExists(input.OrderId.Value))
+                    ModelState.AddModelError("OrderId", "Заявку з таким номером не знайдено");
+                else if (IsOrderPaidOrCompleted(input.OrderId.Value))
+                    ModelState.AddModelError("OrderId", "Заявку вже оплачено або завершено: страховку до неї додати не можна");
+            }
         }
 
         // GET: Analytics/Insurances
@@ -178,7 +192,7 @@ namespace ASTCUSA.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult CreateInsurance([Bind(Include = "OrderId,Type,Price")] InsuranceInput input)
         {
-            ValidateOrder(input);
+            ValidateInsurance(input, null);
             if (!ModelState.IsValid) return View("Insurances", BuildInsurancesPage(input));
 
             var insurance = new AnalyticsInsurance
@@ -226,7 +240,7 @@ namespace ASTCUSA.Controllers
                 return RedirectToAction("Insurances");
             }
 
-            ValidateOrder(input);
+            ValidateInsurance(input, insurance);
             if (!ModelState.IsValid)
             {
                 ViewBag.Orders = OrderList(input.OrderId);
@@ -241,7 +255,7 @@ namespace ASTCUSA.Controllers
             return RedirectToAction("Insurances");
         }
 
-        // POST: Analytics/DeleteInsurance/5 — видалення
+        // POST: Analytics/DeleteInsurance/5 — видалення; страховку оплаченої чи завершеної заявки видалити не можна
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteInsurance(int? id)
@@ -250,6 +264,11 @@ namespace ASTCUSA.Controllers
             if (insurance == null)
             {
                 TempData["Message"] = "Страховку не знайдено.";
+            }
+            else if (IsOrderPaidOrCompleted(insurance.OrderId))
+            {
+                TempData["Message"] = "Страховку №" + insurance.InsuranceId + " не можна видалити: заявку №"
+                    + insurance.OrderId + " вже оплачено або завершено.";
             }
             else
             {

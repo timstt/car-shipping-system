@@ -77,6 +77,9 @@ Besides the main database used by the app (EF Code First), the project has a **s
 - **Table management** tabs: add, edit and delete records in every table — `Users`, `Cars`, `Orders`, `Insurances`, `Invoices`, `Deliveries`.
   - Forms check the same rules as the database: unique e-mail / VIN / tracking number, one invoice and one delivery per order, client / manager / logistician chosen by role, a paid invoice must have a payment date.
   - A record that other records depend on cannot be deleted: a user or car linked to orders, or an order that has insurances, an invoice or a delivery. The page says which records block the deletion.
+  - Finished records are locked: a paid invoice cannot be deleted, un-paid, moved to another order or have its amount changed; a completed delivery (status «Доставлено» or a completed order) cannot be deleted or moved back to another status; a completed order cannot be edited or deleted.
+  - A delivery can be created only for a paid order (status Paid, Shipping or Completed), and an order that has a delivery or a paid invoice cannot go back to an unpaid status.
+  - Insurances of a paid or completed order cannot be added, changed, moved or deleted.
 
 ## Getting started
 

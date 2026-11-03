@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Web.Mvc;
 using ASTCUSA.Models;
@@ -51,6 +52,8 @@ namespace ASTCUSA.Controllers
                     ModelState.AddModelError("OrderId", "Заявку з таким номером не знайдено");
                 else if (AnalyticsDb.Deliveries.Any(d => d.OrderId == input.OrderId.Value))
                     ModelState.AddModelError("OrderId", "Для цієї заявки доставка вже є");
+                else if (!IsOrderPaidStatus(input.OrderId.Value))
+                    ModelState.AddModelError("OrderId", "Доставку можна створити лише для оплаченої заявки (статус " + PaidOrderStatusNames() + ")");
             }
             ValidateDelivery(input, null);
             if (!ModelState.IsValid) return DeliveryForm(input, true);
@@ -102,13 +105,19 @@ namespace ASTCUSA.Controllers
             return RedirectToAction("DeliveriesTable");
         }
 
-        // POST: Analytics/DeleteDelivery/5 — на доставку ніщо не посилається, тож її можна видалити завжди
+        // POST: Analytics/DeleteDelivery/5 — завершену доставку (авто вже доставлено) видалити не можна
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteDelivery(int? id)
         {
             var delivery = id.HasValue ? AnalyticsDb.Deliveries.Find(id.Value) : null;
             if (delivery == null) return NotFoundRedirect("Доставку не знайдено.", "DeliveriesTable");
+
+            if (IsDeliveryCompleted(delivery))
+            {
+                TempData["Message"] = "Доставку для заявки №" + delivery.OrderId + " не можна видалити: її вже завершено.";
+                return RedirectToAction("DeliveriesTable");
+            }
 
             AnalyticsDb.Deliveries.Remove(delivery);
             TempData["Message"] = TrySave("")
@@ -122,9 +131,12 @@ namespace ASTCUSA.Controllers
             ViewBag.IsNew = isNew;
             if (isNew)
             {
-                // Доставку можна додати лише для заявки, у якої її ще немає
+                // Доставку можна додати лише для оплаченої заявки, у якої її ще немає
                 var taken = AnalyticsDb.Deliveries.Select(d => d.OrderId).ToList();
-                ViewBag.Orders = AnalyticsChoices.Pairs(Queries.OrderChoices().Where(o => !taken.Contains(o.Key)), input.OrderId);
+                var paidStatuses = PaidOrderStatuses;
+                var paid = AnalyticsDb.Orders.Where(o => paidStatuses.Contains(o.Status)).Select(o => o.OrderId).ToList();
+                ViewBag.Orders = AnalyticsChoices.Pairs(
+                    Queries.OrderChoices().Where(o => !taken.Contains(o.Key) && paid.Contains(o.Key)), input.OrderId);
             }
             else
             {
@@ -137,6 +149,10 @@ namespace ASTCUSA.Controllers
 
         private void ValidateDelivery(DeliveryInput input, AnalyticsDelivery existing)
         {
+            // Завершену доставку не можна повернути в інший статус, інакше її можна було б потім видалити
+            if (existing != null && IsDeliveryCompleted(existing) && !IsDeliveredStatus(input.Status))
+                ModelState.AddModelError("Status", "Статус завершеної доставки змінити не можна");
+
             if (input.LogisticianId.HasValue && !UserHasRole(input.LogisticianId, UserRole.Logistician))
                 ModelState.AddModelError("LogisticianId", "Оберіть користувача з роллю «Логіст»");
 
@@ -145,6 +161,25 @@ namespace ASTCUSA.Controllers
             if (tracking != null && ModelState.IsValidField("TrackingNumber")
                 && AnalyticsDb.Deliveries.Any(d => d.TrackingNumber == tracking && d.OrderId != ownId))
                 ModelState.AddModelError("TrackingNumber", "Доставка з таким номером відстеження вже є");
+        }
+
+        private const string DeliveredStatus = "Доставлено";
+
+        // Доставку завершено, якщо в неї статус «Доставлено» або її заявка вже має статус «Завершено»
+        private bool IsDeliveryCompleted(AnalyticsDelivery delivery)
+        {
+            return IsDeliveredStatus(delivery.Status) || IsOrderCompleted(delivery.OrderId);
+        }
+
+        private bool IsOrderPaidStatus(int orderId)
+        {
+            var paidStatuses = PaidOrderStatuses;
+            return AnalyticsDb.Orders.Any(o => o.OrderId == orderId && paidStatuses.Contains(o.Status));
+        }
+
+        private static bool IsDeliveredStatus(string status)
+        {
+            return string.Equals(Clean(status), DeliveredStatus, StringComparison.OrdinalIgnoreCase);
         }
 
         private static void CopyDelivery(DeliveryInput input, AnalyticsDelivery delivery)
