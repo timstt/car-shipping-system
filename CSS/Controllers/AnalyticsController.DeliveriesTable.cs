@@ -106,7 +106,7 @@ namespace ASTCUSA.Controllers
         }
 
         // POST: Analytics/DeleteDelivery/5 — видалити можна лише доставку, яку ще не розпочато:
-        // перший етап («Перевізника призначено»), митницю не пройдено, заявку не завершено
+        // перший етап («Очікує перевізника»), митницю не пройдено, заявку не завершено
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteDelivery(int? id)
@@ -115,7 +115,7 @@ namespace ASTCUSA.Controllers
             if (delivery == null) return NotFoundRedirect("Доставку не знайдено.", "DeliveriesTable");
 
             int stage = DeliveryStage(delivery.Status);
-            if (stage > 0 || delivery.IsCustomsCleared || IsOrderCompleted(delivery.OrderId))
+            if (stage != 0 || delivery.IsCustomsCleared || IsOrderCompleted(delivery.OrderId))
             {
                 bool finished = stage == DeliveryStages.Length - 1 || IsOrderCompleted(delivery.OrderId);
                 TempData["Message"] = "Доставку для заявки №" + delivery.OrderId + " не можна видалити: її вже "
@@ -173,14 +173,18 @@ namespace ASTCUSA.Controllers
             else if (existing != null && stage >= 0 && stage < DeliveryStage(existing.Status))
                 ModelState.AddModelError("Status", "Статус доставки не можна повернути назад (зараз «" + existing.Status + "»)");
 
+            // Перевізника призначає логіст, тож без логіста цей етап неможливий
+            if (stage >= CarrierAssignedStage && !input.LogisticianId.HasValue)
+                ModelState.AddModelError("LogisticianId", "Щоб призначити перевізника, оберіть логіста");
+
             // Митне оформлення: без нього авто не відправити, і скасувати його не можна
-            if (stage > 0 && !input.IsCustomsCleared)
+            if (stage >= OnTheWayStage && !input.IsCustomsCleared)
                 ModelState.AddModelError("IsCustomsCleared", "Щоб відправити авто, позначте, що митницю пройдено");
             if (existing != null && existing.IsCustomsCleared && !input.IsCustomsCleared)
                 ModelState.AddModelError("IsCustomsCleared", "Митне оформлення не можна скасувати");
 
             // Після відправлення номер відстеження вже відомий клієнту, змінити його не можна
-            if (existing != null && DeliveryStage(existing.Status) > 0
+            if (existing != null && DeliveryStage(existing.Status) >= OnTheWayStage
                 && Clean(input.TrackingNumber) != null && Clean(input.TrackingNumber) != existing.TrackingNumber)
                 ModelState.AddModelError("TrackingNumber", "Номер відстеження не можна змінити: авто вже в дорозі");
 
@@ -197,8 +201,10 @@ namespace ASTCUSA.Controllers
         // Етапи доставки по порядку
         private static readonly string[] DeliveryStages =
         {
-            "Перевізника призначено", "В дорозі", "Готово до видачі", "Доставлено"
+            "Очікує перевізника", "Перевізника призначено", "В дорозі", "Готово до видачі", "Доставлено"
         };
+        private const int CarrierAssignedStage = 1; // з цього етапу доставку розпочато
+        private const int OnTheWayStage = 2;        // з цього етапу авто вже відправлено
 
         // Номер етапу (0 — перший) або -1, якщо такого статусу немає
         private static int DeliveryStage(string status)
