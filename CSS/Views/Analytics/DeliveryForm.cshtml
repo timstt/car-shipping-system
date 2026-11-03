@@ -3,7 +3,6 @@
 @{
     bool isNew = (bool)ViewBag.IsNew;
     ViewBag.Title = isNew ? "Аналітика — нова доставка" : "Аналітика — зміна доставки";
-    var statuses = (IList<string>)ViewBag.DeliveryStatuses;
 }
 
 @Html.Partial("_AnalyticsNav")
@@ -47,20 +46,16 @@
         </div>
         <div class="col-md-4">
             @Html.LabelFor(m => m.Status, new { @class = "form-label small" })
-            @Html.TextBoxFor(m => m.Status, new { @class = "form-control", list = "delivery-statuses" })
-            <datalist id="delivery-statuses">
-                @foreach (var s in statuses)
-                {
-                    <option value="@s"></option>
-                }
-            </datalist>
+            @Html.DropDownListFor(m => m.Status, (SelectList)ViewBag.DeliveryStatuses, new { @class = "form-select" })
             @Html.ValidationMessageFor(m => m.Status, "", new { @class = "text-danger small" })
+            <div class="form-text">Етапи йдуть лише вперед.</div>
         </div>
         <div class="col-12">
             <div class="form-check">
                 @Html.CheckBoxFor(m => m.IsCustomsCleared, new { @class = "form-check-input" })
                 @Html.LabelFor(m => m.IsCustomsCleared, new { @class = "form-check-label" })
             </div>
+            @Html.ValidationMessageFor(m => m.IsCustomsCleared, "", new { @class = "text-danger small" })
         </div>
     </div>
     <div class="mt-3 d-flex gap-2">

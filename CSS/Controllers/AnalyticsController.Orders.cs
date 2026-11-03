@@ -113,12 +113,19 @@ namespace ASTCUSA.Controllers
             var order = id.HasValue ? AnalyticsDb.Orders.Find(id.Value) : null;
             if (order == null) return NotFoundRedirect("Заявку не знайдено.", "OrdersTable");
 
+            // Оплачену чи завершену заявку видалити не можна: її інвойс, доставка і страховки теж заблоковані
             if (order.Status == OrderStatus.Completed.ToString())
             {
                 TempData["Message"] = "Заявку №" + order.OrderId + " не можна видалити: її вже завершено.";
                 return RedirectToAction("OrdersTable");
             }
+            if (IsOrderPaidOrCompleted(order.OrderId))
+            {
+                TempData["Message"] = "Заявку №" + order.OrderId + " не можна видалити: її вже оплачено.";
+                return RedirectToAction("OrdersTable");
+            }
 
+            // Неоплачена заявка: спершу треба видалити записи, що на неї посилаються
             var blockers = new List<string>();
             int insurances = AnalyticsDb.Insurances.Count(i => i.OrderId == order.OrderId);
             if (insurances > 0) blockers.Add("страховки (" + insurances + ")");
