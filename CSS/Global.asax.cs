@@ -11,7 +11,8 @@ namespace ASTCUSA
     {
         protected void Application_Start()
         {
-            // Code First: створює БД за моделлю і заповнює її тестовими даними (Seed)
+            // Code First Migrations: створює БД або застосовує нові міграції без втрати даних,
+            // у порожню базу додає тестові дані (Seed)
             Database.SetInitializer(new ImportInitializer());
 
             // Базу astcusa_analytics створює SQL-скрипт (AnalyticsDatabase), а не EF,

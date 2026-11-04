@@ -1,12 +1,21 @@
 ﻿using System.Data.Entity;
+using System.Linq;
+using ASTCUSA.Migrations;
 
 namespace ASTCUSA.Models
 {
     // Підключається в Global.asax: Database.SetInitializer(new ImportInitializer())
-    public class ImportInitializer : DropCreateDatabaseIfModelChanges<ImportContext>
+    // Створює базу, якщо її немає, і застосовує нові міграції (папка Migrations), не видаляючи дані.
+    // Тестові дані додає Configuration.Seed → SeedIfEmpty.
+    public class ImportInitializer : MigrateDatabaseToLatestVersion<ImportContext, Configuration>
     {
-        protected override void Seed(ImportContext db)
+        // true — мігрувати ту базу, з якою створено контекст (її рядок підключення)
+        public ImportInitializer() : base(true) { }
+
+        public static void SeedIfEmpty(ImportContext db)
         {
+            if (db.Users.Any() || db.Cars.Any()) return;
+
             // Тестові користувачі: у БД зберігається лише PBKDF2-хеш пароля
             db.Clients.Add(WithPassword(new Client { Name = "Іван Петренко", Email = "ivan@mail.com", PhoneNumber = "+380501112233", Address = "Чернігів" }, "Ivan#2026"));
             db.Clients.Add(WithPassword(new Client { Name = "Марія Шевчук", Email = "maria@mail.com", PhoneNumber = "+380671234567", Address = "Київ" }, "Maria#2026"));

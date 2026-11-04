@@ -164,6 +164,15 @@
     <Compile Include="Models\PasswordHasher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Models\User.cs" />
+    <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Migrations\202611031507164_InitialCreate.cs" />
+    <Compile Include="Migrations\202611031507164_InitialCreate.Designer.cs">
+      <DependentUpon>202611031507164_InitialCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202611041658452_AddConcurrencyTokensAndUniqueVin.cs" />
+    <Compile Include="Migrations\202611041658452_AddConcurrencyTokensAndUniqueVin.Designer.cs">
+      <DependentUpon>202611041658452_AddConcurrencyTokensAndUniqueVin.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-grid.css" />
@@ -255,6 +264,14 @@
     <Content Include="Views\Analytics\InvoiceForm.cshtml" />
     <Content Include="Views\Analytics\DeliveriesTable.cshtml" />
     <Content Include="Views\Analytics\DeliveryForm.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\202611031507164_InitialCreate.resx">
+      <DependentUpon>202611031507164_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202611041658452_AddConcurrencyTokensAndUniqueVin.resx">
+      <DependentUpon>202611041658452_AddConcurrencyTokensAndUniqueVin.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <!-- SQL-скрипт створення бази astcusa_analytics вбудовано в збірку, AnalyticsDatabase виконує його під час першого запуску -->

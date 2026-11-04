@@ -62,6 +62,11 @@ namespace ASTCUSA.Models
         [Display(Name = "Відгук")]
         public string Review { get; set; }
 
+        // Версія рядка (SQL rowversion): захищає від втрачених оновлень, коли заявку одночасно
+        // змінюють клієнт і менеджер/логіст — друге збереження отримає DbUpdateConcurrencyException
+        [Timestamp]
+        public byte[] RowVersion { get; set; }
+
         // Заявка «активна», поки авто в роботі; завершені/скасовані/програні не блокують авто.
         public static readonly OrderStatus[] InactiveStatuses =
             { OrderStatus.Cancelled, OrderStatus.BidLost, OrderStatus.Completed };

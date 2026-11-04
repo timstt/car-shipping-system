@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ASTCUSA.Models
 {
@@ -8,8 +9,10 @@ namespace ASTCUSA.Models
         [Required(ErrorMessage = "Не вказано авто")]
         public int CarId { get; set; }
 
+        // Унікальний індекс у БД: навіть два одночасні запити не збережуть однаковий VIN
         [Required(ErrorMessage = "Вкажіть VIN-код")]
         [StringLength(17, MinimumLength = 11, ErrorMessage = "VIN-код має містити 11–17 символів")]
+        [Index("IX_Car_VinCode", IsUnique = true)]
         [Display(Name = "VIN-код")]
         public string VinCode { get; set; }
 
@@ -33,6 +36,11 @@ namespace ASTCUSA.Models
 
         [Display(Name = "Статус")]
         public CarStatus Status { get; set; }
+
+        // Версія рядка (SQL rowversion) — маркер паралельного доступу. SQL Server змінює її при кожному
+        // оновленні; якщо запис уже змінив хтось інший, SaveChanges кидає DbUpdateConcurrencyException.
+        [Timestamp]
+        public byte[] RowVersion { get; set; }
 
         // getDetails(): String
         public string GetDetails()
