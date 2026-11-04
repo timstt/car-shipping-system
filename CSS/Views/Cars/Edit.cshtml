@@ -11,6 +11,8 @@
 {
     @Html.AntiForgeryToken()
     @Html.HiddenFor(m => m.CarId)
+    @* Версія запису на момент відкриття форми: якщо авто тим часом змінили, збереження буде відхилено *@
+    @Html.HiddenFor(m => m.RowVersion)
     @Html.Partial("_CarForm", Model)
     <div class="mt-3 d-flex gap-2">
         <button type="submit" class="btn btn-primary">Зберегти</button>

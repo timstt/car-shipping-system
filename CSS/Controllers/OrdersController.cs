@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
@@ -75,6 +76,8 @@ namespace ASTCUSA.Controllers
             ViewBag.CarId = new SelectList(cars, "CarId", "Title", selectedCarId);
         }
 
+        // Виконати дію і зберегти всі її зміни одним SaveChanges — EF6 загортає його в транзакцію,
+        // тож зміни кількох таблиць (заявка, авто, інвойс, сповіщення) зберігаються або всі, або жодна
         private ActionResult Run(int id, Action action, string successMessage)
         {
             try
@@ -91,6 +94,23 @@ namespace ASTCUSA.Controllers
             {
                 return BackToOrder(id, ex.Message);
             }
+            catch (DbUpdateConcurrencyException)
+            {
+                // Заявку або авто щойно змінив інший користувач (RowVersion) — нічого не збережено
+                return BackToOrder(id, ConcurrencyMessage);
+            }
+            catch (DbUpdateException)
+            {
+                return BackToOrder(id, "Не вдалося зберегти зміни: дані порушують обмеження бази. Нічого не змінено.");
+            }
+        }
+
+        // Оптимістичне блокування авто при виборі для заявки: UPDATE з перевіркою RowVersion.
+        // Якщо два клієнти одночасно обирають те саме авто, друге збереження отримає
+        // DbUpdateConcurrencyException, і його заявка не буде створена.
+        private void ClaimCar(Car car)
+        {
+            db.Entry(car).State = EntityState.Modified;
         }
 
         // ---------- Перегляд ----------
@@ -156,10 +176,20 @@ namespace ASTCUSA.Controllers
             {
                 var order = CurrentClient.CreateOrder(form.MaxBudget);
                 order.AssignCar(car);
+                ClaimCar(car);
                 db.Orders.Add(order);
-                db.SaveChanges();
-                TempData["Message"] = "Заявку №" + order.OrderId + " створено. Менеджер візьме її в роботу.";
-                return RedirectToAction("Details", new { id = order.OrderId });
+                try
+                {
+                    db.SaveChanges();
+                    TempData["Message"] = "Заявку №" + order.OrderId + " створено. Менеджер візьме її в роботу.";
+                    return RedirectToAction("Details", new { id = order.OrderId });
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    // Авто щойно обрав інший клієнт: заявку не створено (відкат усього SaveChanges)
+                    db.Entry(order).State = EntityState.Detached;
+                    ModelState.AddModelError("CarId", "Це авто щойно обрав інший клієнт. Оберіть інше авто.");
+                }
             }
 
             FillCarList(form.CarId, null);
@@ -190,11 +220,15 @@ namespace ASTCUSA.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AllowRoles(UserRole.Client)]
-        public ActionResult Edit([Bind(Include = "OrderId,MaxBudget,CarId")] Order form)
+        public ActionResult Edit([Bind(Include = "OrderId,MaxBudget,CarId,RowVersion")] Order form)
         {
             var order = FindAccessibleOrder(form.OrderId);
             if (order == null) return OrderNotFound();
             if (!ClientCanEdit(order)) return BackToOrder(order.OrderId, "На цьому етапі заявку змінити не можна.");
+
+            // Версія заявки з форми: якщо менеджер тим часом змінив заявку, збереження буде відхилено
+            if (form.RowVersion != null)
+                db.Entry(order).Property(o => o.RowVersion).OriginalValue = form.RowVersion;
 
             Car newCar = null;
             if (form.CarId != order.CarId || order.Car == null || order.Car.Status != CarStatus.Available)
@@ -215,14 +249,25 @@ namespace ASTCUSA.Controllers
             }
 
             order.ChangeBudget(form.MaxBudget);
-            if (newCar != null) order.AssignCar(newCar);
+            if (newCar != null)
+            {
+                order.AssignCar(newCar);
+                ClaimCar(newCar);
+            }
             // Після програної ставки клієнт продовжує пошук — заявка знову потрапляє до менеджера
             if (order.Status == OrderStatus.BidLost)
             {
                 order.FinalPrice = null;
                 order.UpdateStatus(OrderStatus.New);
             }
-            db.SaveChanges();
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return BackToOrder(order.OrderId, ConcurrencyMessage);
+            }
             return BackToOrder(order.OrderId, "Заявку оновлено.");
         }
 
@@ -401,7 +446,14 @@ namespace ASTCUSA.Controllers
                 manager.NotifyClient(order.Client, string.Format(
                     "Заявка №{0}: бюджет ${1:N0} менший за ціну авто ${2:N0}. Оберіть інше авто або змініть бюджет.",
                     order.OrderId, order.MaxBudget, order.Car.AuctionPrice));
-                db.SaveChanges();
+                try
+                {
+                    db.SaveChanges();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    return BackToOrder(id, ConcurrencyMessage);
+                }
                 return BackToOrder(id, "Бюджет клієнта не дозволяє брати участь. Клієнта сповіщено.");
             }
 
@@ -431,6 +483,11 @@ namespace ASTCUSA.Controllers
             catch (InvalidOperationException ex)
             {
                 return BackToOrder(id, ex.Message);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // Клієнт тим часом скасував чи змінив заявку — ставку не збережено
+                return BackToOrder(id, ConcurrencyMessage);
             }
         }
 
@@ -513,11 +570,19 @@ namespace ASTCUSA.Controllers
             if (order == null) return OrderNotFound();
             if (!CanDelete(order)) return BackToOrder(id, "Видалити можна лише нову, скасовану або програну заявку.");
 
+            // Залежні записи видаляються разом із заявкою в одному SaveChanges (одна транзакція)
             db.Insurances.RemoveRange(order.Insurances.ToList());
             db.Invoices.RemoveRange(order.Invoices.ToList());
             if (order.Delivery != null) db.Deliveries.Remove(order.Delivery);
             db.Orders.Remove(order);
-            db.SaveChanges();
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return BackToOrder(id, ConcurrencyMessage);
+            }
             TempData["Message"] = "Заявку №" + id + " видалено.";
             return RedirectToAction("Index");
         }

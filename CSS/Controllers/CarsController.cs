@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
@@ -11,6 +12,8 @@ namespace ASTCUSA.Controllers
     // і ведення каталогу менеджером
     public class CarsController : BaseController
     {
+        private const string DuplicateVin = "Авто з таким VIN-кодом уже є в каталозі.";
+
         private CarCatalog Catalog { get { return new CarCatalog(db.Cars); } }
 
         private List<int> FavoriteIds
@@ -88,7 +91,16 @@ namespace ASTCUSA.Controllers
 
             car.Status = CarStatus.Available;
             db.Cars.Add(car);
-            db.SaveChanges();
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (DbUpdateException)
+            {
+                // Унікальний індекс IX_Car_VinCode: такий самий VIN щойно додав інший менеджер
+                ModelState.AddModelError("VinCode", DuplicateVin);
+                return View(car);
+            }
             TempData["Message"] = "Авто додано до каталогу.";
             return RedirectToAction("Index");
         }
@@ -109,13 +121,13 @@ namespace ASTCUSA.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AllowRoles(UserRole.Manager)]
-        public ActionResult Edit([Bind(Include = "CarId,VinCode,Make,Model,Year,AuctionPrice")] Car form)
+        public ActionResult Edit([Bind(Include = "CarId,VinCode,Make,Model,Year,AuctionPrice,RowVersion")] Car form)
         {
             var car = db.Cars.Find(form.CarId);
             if (car == null) return HttpNotFound();
 
             if (db.Cars.Any(c => c.VinCode == form.VinCode && c.CarId != form.CarId))
-                ModelState.AddModelError("VinCode", "Авто з таким VIN-кодом уже є в каталозі.");
+                ModelState.AddModelError("VinCode", DuplicateVin);
 
             if (!ModelState.IsValid)
             {
@@ -123,12 +135,34 @@ namespace ASTCUSA.Controllers
                 return View(form);
             }
 
+            // Перевірка паралельного доступу: порівнюємо з версією, яку менеджер бачив у формі,
+            // а не з щойно прочитаною. Якщо хтось уже змінив авто, UPDATE не знайде рядок → виняток.
+            if (form.RowVersion != null)
+                db.Entry(car).Property(c => c.RowVersion).OriginalValue = form.RowVersion;
+
             car.VinCode = form.VinCode;
             car.Make = form.Make;
             car.Model = form.Model;
             car.Year = form.Year;
             car.UpdatePrice(form.AuctionPrice);
-            db.SaveChanges();
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // Показати актуальні дані з БД і нову версію, щоб менеджер міг повторити зміну
+                db.Entry(car).Reload();
+                ModelState.Clear();
+                ModelState.AddModelError("", ConcurrencyMessage);
+                return View(car);
+            }
+            catch (DbUpdateException)
+            {
+                form.Status = car.Status;
+                ModelState.AddModelError("VinCode", DuplicateVin);
+                return View(form);
+            }
             TempData["Message"] = "Дані авто оновлено.";
             return RedirectToAction("Details", new { id = car.CarId });
         }
@@ -164,7 +198,16 @@ namespace ASTCUSA.Controllers
                 return RedirectToAction("Details", new { id = id });
             }
             db.Cars.Remove(car);
-            db.SaveChanges();
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (DbUpdateException)
+            {
+                // Між перевіркою і видаленням на авто створили заявку (FK) або авто змінили (RowVersion)
+                TempData["Message"] = "Авто не видалено: його щойно змінили або на нього створили заявку. Спробуйте ще раз.";
+                return RedirectToAction("Details", new { id = id });
+            }
             FavoriteIds.Remove(id);
             TempData["Message"] = "Авто видалено з каталогу.";
             return RedirectToAction("Index");

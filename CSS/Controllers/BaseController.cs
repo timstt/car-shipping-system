@@ -13,6 +13,10 @@ namespace ASTCUSA.Controllers
     {
         protected readonly ImportContext db = new ImportContext();
 
+        // Повідомлення про конфлікт паралельного доступу (DbUpdateConcurrencyException через RowVersion)
+        protected const string ConcurrencyMessage =
+            "Запис щойно змінив інший користувач. Перегляньте актуальні дані та повторіть дію.";
+
         protected UserRole CurrentRole
         {
             get { return User.Identity.GetUserRole(); }

@@ -14,6 +14,8 @@
 {
     @Html.AntiForgeryToken()
     @Html.HiddenFor(m => m.OrderId)
+    @* Версія заявки на момент відкриття форми: якщо менеджер тим часом змінив заявку, збереження буде відхилено *@
+    @Html.HiddenFor(m => m.RowVersion)
     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
     <div class="row g-3">
         <div class="col-md-8">
