@@ -4,7 +4,6 @@ namespace ASTCUSA
 {
     public class BundleConfig
     {
-        // Докладніше про об'єднання файлів: https://go.microsoft.com/fwlink/?LinkId=301862
         public static void RegisterBundles(BundleCollection bundles)
         {
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
