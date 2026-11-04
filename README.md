@@ -99,17 +99,6 @@ Requirements: Visual Studio with the **ASP.NET and web development** workload (i
 
 The connection strings are in `CSS/Web.config`. The second database is created automatically on the first visit to the **Analytics** section (sign in as the manager).
 
-## Tests
-
-`CSS.Tests` is an xUnit project (.NET Framework 4.7.2) that checks CRUD for every entity of the main database, the full order workflow, ACID properties (rollback, constraints, concurrency conflicts, isolation level, durability) and role restrictions. It uses a separate LocalDB database `astcusa_tests`, created by the same migrations; the working databases are not touched.
-
-Run the tests from Visual Studio (Test Explorer) or from the command line. The web project uses the classic ASP.NET build targets, so build it with the Visual Studio MSBuild rather than `dotnet build`:
-
-```
-"C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" CSS.Tests\CSS.Tests.csproj -restore
-dotnet test CSS.Tests\CSS.Tests.csproj --no-build
-```
-
 ## Test accounts
 
 Seeded by `CSS/Models/ImportInitializer.cs`:
