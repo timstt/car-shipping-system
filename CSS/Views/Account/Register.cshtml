@@ -11,7 +11,11 @@
         @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "card card-body" }))
         {
             @Html.AntiForgeryToken()
-            @Html.ValidationSummary(true, "", new { @class = "alert alert-danger py-2" })
+            @* Червоний блок лише для помилок усієї форми (ключ ""); помилки полів показуються під полями *@
+            if (ViewData.ModelState.ContainsKey("") && ViewData.ModelState[""].Errors.Count > 0)
+            {
+                @Html.ValidationSummary(true, "", new { @class = "alert alert-danger py-2" })
+            }
 
             <div class="row g-3">
                 <div class="col-md-6">
