@@ -325,6 +325,64 @@ namespace ASTCUSA.Controllers
             return Run(id, () => order.AddInsurance(insurance), "Страховий пакет додано.");
         }
 
+        // Страховка цієї заявки (null — немає або належить іншій заявці)
+        private static Insurance FindInsurance(Order order, int insuranceId)
+        {
+            return order.Insurances == null ? null : order.Insurances.FirstOrDefault(i => i.InsuranceId == insuranceId);
+        }
+
+        // GET: Orders/EditInsurance/5?insuranceId=3 — змінити страховий пакет (до оплати)
+        [HttpGet]
+        [AllowRoles(UserRole.Client)]
+        public ActionResult EditInsurance(int id, int insuranceId)
+        {
+            var order = FindAccessibleOrder(id);
+            if (order == null) return OrderNotFound();
+            var insurance = FindInsurance(order, insuranceId);
+            if (insurance == null) return BackToOrder(id, "Страховий пакет не знайдено.");
+            if (!order.CanChangeInsurances) return BackToOrder(id, "Страховку можна змінити лише до оплати заявки.");
+            ViewBag.Order = order;
+            return View(insurance);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AllowRoles(UserRole.Client)]
+        public ActionResult EditInsurance(int id, int insuranceId, [Bind(Include = "Type,Price")] Insurance form)
+        {
+            var order = FindAccessibleOrder(id);
+            if (order == null) return OrderNotFound();
+            var insurance = FindInsurance(order, insuranceId);
+            if (insurance == null) return BackToOrder(id, "Страховий пакет не знайдено.");
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Order = order;
+                form.InsuranceId = insuranceId;
+                form.OrderId = id;
+                return View(form);
+            }
+            return Run(id, () => order.ChangeInsurance(insurance, form.Type, form.Price), "Страховий пакет змінено.");
+        }
+
+        // POST: Orders/DeleteInsurance/5?insuranceId=3 — прибрати страховий пакет (до оплати)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AllowRoles(UserRole.Client)]
+        public ActionResult DeleteInsurance(int id, int insuranceId)
+        {
+            var order = FindAccessibleOrder(id);
+            if (order == null) return OrderNotFound();
+            var insurance = FindInsurance(order, insuranceId);
+            if (insurance == null) return BackToOrder(id, "Страховий пакет уже прибрано.");
+            return Run(id, () =>
+            {
+                order.RemoveInsurance(insurance);
+                // Саме видалення запису з таблиці; лише прибрати з колекції замало —
+                // EF спробував би обнулити обов'язковий зовнішній ключ OrderId
+                db.Insurances.Remove(insurance);
+            }, "Страховий пакет прибрано.");
+        }
+
         // POST: Orders/PayInvoice/5 — «Оплатити інвойс»
         [HttpPost]
         [ValidateAntiForgeryToken]

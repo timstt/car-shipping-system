@@ -14,6 +14,28 @@ namespace ASTCUSA.Models
         public string Password { get; set; }
     }
 
+    // Профіль клієнта: e-mail (логін) лише показується, змінюються ім'я, телефон і адреса
+    public class ProfileViewModel
+    {
+        [Display(Name = "E-mail")]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "Вкажіть ім'я"), StringLength(100, ErrorMessage = "Ім'я задовге")]
+        [Display(Name = "Ім'я")]
+        public string Name { get; set; }
+
+        [Phone(ErrorMessage = "Некоректний номер телефону"), StringLength(30, ErrorMessage = "Номер телефону задовгий")]
+        [Display(Name = "Телефон")]
+        public string PhoneNumber { get; set; }
+
+        [StringLength(200, ErrorMessage = "Адреса задовга")]
+        [Display(Name = "Адреса")]
+        public string Address { get; set; }
+
+        // Кількість заявок: клієнта із заявками видалити не можна
+        public int OrdersCount { get; set; }
+    }
+
     // Реєстрація доступна лише для ролі «Клієнт»
     public class RegisterViewModel
     {

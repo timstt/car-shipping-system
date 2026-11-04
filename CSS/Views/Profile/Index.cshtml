@@ -1,0 +1,28 @@
+﻿@model ProfileViewModel
+@{
+    ViewBag.Title = "Мій профіль";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <h1 class="h3 mb-3">Мій профіль</h1>
+        <div class="card card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-4">@Html.DisplayNameFor(m => m.Name)</dt>
+                <dd class="col-sm-8">@Model.Name</dd>
+                <dt class="col-sm-4">@Html.DisplayNameFor(m => m.Email)</dt>
+                <dd class="col-sm-8">@Model.Email</dd>
+                <dt class="col-sm-4">@Html.DisplayNameFor(m => m.PhoneNumber)</dt>
+                <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.PhoneNumber) ? "—" : Model.PhoneNumber)</dd>
+                <dt class="col-sm-4">@Html.DisplayNameFor(m => m.Address)</dt>
+                <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.Address) ? "—" : Model.Address)</dd>
+                <dt class="col-sm-4">Заявок</dt>
+                <dd class="col-sm-8">@Model.OrdersCount</dd>
+            </dl>
+        </div>
+        <div class="mt-3 d-flex gap-2">
+            @Html.ActionLink("Змінити дані", "Edit", null, new { @class = "btn btn-primary" })
+            @Html.ActionLink("Видалити обліковий запис", "Delete", null, new { @class = "btn btn-outline-danger" })
+        </div>
+    </div>
+</div>

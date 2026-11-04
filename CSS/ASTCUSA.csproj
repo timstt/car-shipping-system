@@ -132,6 +132,7 @@
     <Compile Include="Controllers\CarsController.cs" />
     <Compile Include="Controllers\OrdersController.cs" />
     <Compile Include="Controllers\ReportsController.cs" />
+    <Compile Include="Controllers\ProfileController.cs" />
     <Compile Include="Controllers\AnalyticsController.cs" />
     <Compile Include="Controllers\AnalyticsController.Tables.cs" />
     <Compile Include="Controllers\AnalyticsController.Users.cs" />
@@ -240,6 +241,10 @@
     <Content Include="Views\Orders\Delete.cshtml" />
     <Content Include="Views\Orders\Details.cshtml" />
     <Content Include="Views\Orders\Edit.cshtml" />
+    <Content Include="Views\Orders\EditInsurance.cshtml" />
+    <Content Include="Views\Profile\Index.cshtml" />
+    <Content Include="Views\Profile\Edit.cshtml" />
+    <Content Include="Views\Profile\Delete.cshtml" />
     <Content Include="Views\Orders\Index.cshtml" />
     <Content Include="Views\Orders\Mandate.cshtml" />
     <Content Include="Views\Orders\PlaceBid.cshtml" />

@@ -66,7 +66,20 @@
                 {
                     foreach (var ins in Model.Insurances)
                     {
-                        <li class="list-group-item">@ins.GetCoverageDetails()</li>
+                        <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <span>@ins.GetCoverageDetails()</span>
+                            @if (role == UserRole.Client && Model.CanChangeInsurances)
+                            {
+                                <span class="d-flex gap-2">
+                                    @Html.ActionLink("Змінити", "EditInsurance", new { id = Model.OrderId, insuranceId = ins.InsuranceId }, new { @class = "btn btn-sm btn-outline-secondary" })
+                                    @using (Html.BeginForm("DeleteInsurance", "Orders", new { id = Model.OrderId, insuranceId = ins.InsuranceId }, FormMethod.Post))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Прибрати цей страховий пакет?');">Прибрати</button>
+                                    }
+                                </span>
+                            }
+                        </li>
                     }
                 }
             </ul>

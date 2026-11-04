@@ -1,0 +1,30 @@
+﻿@model ProfileViewModel
+@{
+    ViewBag.Title = "Видалити обліковий запис";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <h1 class="h3 mb-3">Видалити обліковий запис</h1>
+
+        @if (Model.OrdersCount > 0)
+        {
+            <div class="alert alert-warning">
+                Обліковий запис не можна видалити: у вас є заявки (@Model.OrdersCount). Заявки зберігаються як історія угод.
+            </div>
+            @Html.ActionLink("Назад до профілю", "Index", null, new { @class = "btn btn-outline-secondary" })
+        }
+        else
+        {
+            <div class="alert alert-danger">
+                Обліковий запис <strong>@Model.Email</strong> буде видалено без можливості відновлення. Ви вийдете із системи.
+            </div>
+            using (Html.BeginForm("Delete", "Profile", FormMethod.Post, new { @class = "d-flex gap-2" }))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-danger">Видалити</button>
+                @Html.ActionLink("Скасувати", "Index", null, new { @class = "btn btn-outline-secondary" })
+            }
+        }
+    </div>
+</div>

@@ -1,0 +1,47 @@
+﻿@model ProfileViewModel
+@{
+    ViewBag.Title = "Змінити профіль";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <h1 class="h3 mb-3">Змінити профіль</h1>
+
+        @using (Html.BeginForm("Edit", "Profile", FormMethod.Post, new { @class = "card card-body" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "alert alert-danger py-2" })
+
+            <div class="row g-3">
+                <div class="col-12">
+                    @Html.LabelFor(m => m.Email, new { @class = "form-label" })
+                    <input class="form-control" value="@Model.Email" readonly />
+                    <div class="form-text">E-mail використовується для входу, його змінити не можна.</div>
+                </div>
+                <div class="col-md-6">
+                    @Html.LabelFor(m => m.Name, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.Name, new { @class = "form-control", autocomplete = "name" })
+                    @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger small" })
+                </div>
+                <div class="col-md-6">
+                    @Html.LabelFor(m => m.PhoneNumber, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "form-control", type = "tel", autocomplete = "tel" })
+                    @Html.ValidationMessageFor(m => m.PhoneNumber, "", new { @class = "text-danger small" })
+                </div>
+                <div class="col-12">
+                    @Html.LabelFor(m => m.Address, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.Address, new { @class = "form-control", autocomplete = "address-level2" })
+                    @Html.ValidationMessageFor(m => m.Address, "", new { @class = "text-danger small" })
+                </div>
+            </div>
+            <div class="mt-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Зберегти</button>
+                @Html.ActionLink("Скасувати", "Index", null, new { @class = "btn btn-outline-secondary" })
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

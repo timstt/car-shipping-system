@@ -32,6 +32,7 @@
                             <li class="nav-item">@Html.ActionLink("Обране", "Favorites", "Cars", null, new { @class = "nav-link" })</li>
                             <li class="nav-item">@Html.ActionLink("Мої заявки", "Index", "Orders", null, new { @class = "nav-link" + active("Orders") })</li>
                             <li class="nav-item">@Html.ActionLink("Нова заявка", "Create", "Orders", null, new { @class = "nav-link" })</li>
+                            <li class="nav-item">@Html.ActionLink("Мій профіль", "Index", "Profile", null, new { @class = "nav-link" + active("Profile") })</li>
                         }
                         else if (role == UserRole.Manager)
                         {

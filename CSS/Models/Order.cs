@@ -93,15 +93,43 @@ namespace ASTCUSA.Models
             CarId = car == null ? (int?)null : car.CarId;
         }
 
+        // Страховки можна додавати, змінювати й прибирати лише до оплати заявки
+        public bool CanChangeInsurances
+        {
+            get
+            {
+                return Status != OrderStatus.Paid && Status != OrderStatus.Shipping &&
+                       Status != OrderStatus.Completed && Status != OrderStatus.Cancelled;
+            }
+        }
+
         // addInsurance(insurance: Insurance): void
         public void AddInsurance(Insurance insurance)
         {
-            if (Status == OrderStatus.Paid || Status == OrderStatus.Shipping ||
-                Status == OrderStatus.Completed || Status == OrderStatus.Cancelled)
+            if (!CanChangeInsurances)
                 throw new InvalidOperationException("Страховку можна додати лише до оплати заявки.");
             if (Insurances == null) Insurances = new List<Insurance>();
             insurance.OrderId = OrderId;
             Insurances.Add(insurance);
+        }
+
+        // changeInsurance(insurance, type, price): void
+        public void ChangeInsurance(Insurance insurance, string type, double price)
+        {
+            if (!CanChangeInsurances)
+                throw new InvalidOperationException("Страховку можна змінити лише до оплати заявки.");
+            if (string.IsNullOrWhiteSpace(type)) throw new ArgumentException("Вкажіть тип страховки.");
+            if (price <= 0) throw new ArgumentException("Ціна має бути більшою за 0.");
+            insurance.Type = type.Trim();
+            insurance.Price = price;
+        }
+
+        // removeInsurance(insurance): void — сам запис видаляє контролер через db.Insurances.Remove
+        public void RemoveInsurance(Insurance insurance)
+        {
+            if (!CanChangeInsurances)
+                throw new InvalidOperationException("Страховку можна прибрати лише до оплати заявки.");
+            if (Insurances != null) Insurances.Remove(insurance);
         }
     }
 }
