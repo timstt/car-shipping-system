@@ -13,13 +13,14 @@ Access is controlled by role. All pages except the home page, login and registra
 ### Client
 
 - Register a new account (only clients can self-register) and sign in / sign out.
+- View and edit the profile (name, phone, address); delete the account if it has no orders.
 - Browse the car catalog (clients see only cars with the *Available* status) and filter it by make, model, year range and price range.
 - Add cars to **Favorites** and remove them (stored in the session, cleared on logout).
 - Create an order for a car with a maximum budget.
 - Edit the order (change the budget or pick another car) while it is *New*, *Documents requested*, *Documents provided* or *Bid lost*. Editing a *Bid lost* order sends it back to the manager as *New*.
 - Cancel an order (not possible after the bid has been won).
 - Provide documents when the manager requests them.
-- Add an insurance package (type and price) to an order.
+- Add an insurance package (type and price) to an order, change or remove it until the order is paid.
 - Pay an invoice.
 - Track delivery: tracking number, current location, delivery status and customs status.
 - Confirm receipt of the car once it is ready for pickup, then leave a review.
@@ -59,7 +60,13 @@ Access is controlled by role. All pages except the home page, login and registra
 | UI | Bootstrap 5.2.3, jQuery, jQuery Validation |
 | Authentication | Forms Authentication cookie; passwords stored as PBKDF2 hashes |
 
-The database is created automatically on first run by `ImportInitializer` (`DropCreateDatabaseIfModelChanges`), which also seeds test users and cars. If the model changes, the database is dropped and recreated.
+The database schema is managed by **EF6 Code First Migrations** (`CSS/Migrations`). On startup `ImportInitializer` (`MigrateDatabaseToLatestVersion`) creates the database if it is missing and applies new migrations without deleting data; test users and cars are seeded only into an empty database.
+
+### Data integrity and concurrency
+
+- Every action saves all its changes with one `SaveChanges`, which EF runs in a single transaction: changes to several tables (order, car, invoice, notification) are saved together or not at all.
+- Unique indexes on user e-mail, car VIN and invoice order; foreign keys; validation attributes on the models.
+- `Car` and `Order` have a `RowVersion` concurrency token. Editing a car or an order that someone else changed after the form was opened is rejected with a message, and two clients cannot order the same car at the same time.
 
 ## Analytics database
 
@@ -92,6 +99,17 @@ Requirements: Visual Studio with the **ASP.NET and web development** workload (i
 
 The connection strings are in `CSS/Web.config`. The second database is created automatically on the first visit to the **Analytics** section (sign in as the manager).
 
+## Tests
+
+`CSS.Tests` is an xUnit project (.NET Framework 4.7.2) that checks CRUD for every entity of the main database, the full order workflow, ACID properties (rollback, constraints, concurrency conflicts, isolation level, durability) and role restrictions. It uses a separate LocalDB database `astcusa_tests`, created by the same migrations; the working databases are not touched.
+
+Run the tests from Visual Studio (Test Explorer) or from the command line. The web project uses the classic ASP.NET build targets, so build it with the Visual Studio MSBuild rather than `dotnet build`:
+
+```
+"C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" CSS.Tests\CSS.Tests.csproj -restore
+dotnet test CSS.Tests\CSS.Tests.csproj --no-build
+```
+
 ## Test accounts
 
 Seeded by `CSS/Models/ImportInitializer.cs`:
@@ -118,7 +136,9 @@ CSS/                         Web project (ASTCUSA.csproj)
 │   ├── HomeController.cs    Home page / role dashboard
 │   ├── CarsController.cs    Catalog, search, favorites, car CRUD
 │   ├── OrdersController.cs  Order workflow for all three roles
+│   ├── ProfileController.cs Client profile: view, edit, delete
 │   └── ReportsController.cs Reports and CSV export
+├── Migrations/              EF6 Code First migrations and their configuration
 ├── Models/
 │   ├── User.cs              Abstract User + Client, Manager, Logistician (TPH)
 │   ├── Car.cs, CarCatalog.cs
@@ -126,7 +146,7 @@ CSS/                         Web project (ASTCUSA.csproj)
 │   ├── OrderReport.cs       Report data and CSV generation
 │   ├── Enums.cs             CarStatus, OrderStatus, UserRole
 │   ├── ImportContext.cs     EF DbContext
-│   ├── ImportInitializer.cs DB initializer and seed data
+│   ├── ImportInitializer.cs Migrating DB initializer and seed data
 │   ├── AuthTicket.cs, PasswordHasher.cs
 │   └── AccountViewModels.cs
 ├── Views/                   Razor views: Account, Cars, Home, Orders, Reports, Shared
