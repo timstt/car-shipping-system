@@ -29,7 +29,7 @@
                 </div>
                 <div class="col-md-6">
                     @Html.LabelFor(m => m.PhoneNumber, new { @class = "form-label" })
-                    @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "form-control", type = "tel", autocomplete = "tel" })
+                    @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "form-control", type = "tel", autocomplete = "tel", placeholder = "+380XXXXXXXXX" })
                     @Html.ValidationMessageFor(m => m.PhoneNumber, "", new { @class = "text-danger small" })
                 </div>
                 <div class="col-12">

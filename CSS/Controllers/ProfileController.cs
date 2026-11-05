@@ -58,7 +58,7 @@ namespace ASTCUSA.Controllers
             }
 
             client.Name = model.Name.Trim();
-            client.PhoneNumber = string.IsNullOrWhiteSpace(model.PhoneNumber) ? null : model.PhoneNumber.Trim();
+            client.PhoneNumber = PhoneNumbers.Normalize(model.PhoneNumber);
             client.Address = string.IsNullOrWhiteSpace(model.Address) ? null : model.Address.Trim();
             db.SaveChanges();
 

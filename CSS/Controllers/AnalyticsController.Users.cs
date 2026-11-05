@@ -134,7 +134,7 @@ namespace ASTCUSA.Controllers
             user.Email = input.Email.Trim();
             user.Role = input.Role;
             // Телефон і адреса є лише в клієнта
-            user.PhoneNumber = client ? Clean(input.PhoneNumber) : null;
+            user.PhoneNumber = client ? PhoneNumbers.Normalize(input.PhoneNumber) : null;
             user.Address = client ? Clean(input.Address) : null;
         }
 

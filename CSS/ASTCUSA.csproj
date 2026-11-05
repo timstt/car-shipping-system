@@ -163,6 +163,7 @@
     <Compile Include="Models\Invoice.cs" />
     <Compile Include="Models\Order.cs" />
     <Compile Include="Models\PasswordHasher.cs" />
+    <Compile Include="Models\PhoneNumbers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Migrations\Configuration.cs" />

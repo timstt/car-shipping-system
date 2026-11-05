@@ -82,7 +82,7 @@ namespace ASTCUSA.Controllers
             {
                 Name = model.Name.Trim(),
                 Email = email,
-                PhoneNumber = string.IsNullOrWhiteSpace(model.PhoneNumber) ? null : model.PhoneNumber.Trim(),
+                PhoneNumber = PhoneNumbers.Normalize(model.PhoneNumber),
                 Address = string.IsNullOrWhiteSpace(model.Address) ? null : model.Address.Trim()
             };
             client.SetPassword(model.Password);

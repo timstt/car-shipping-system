@@ -24,7 +24,7 @@ namespace ASTCUSA.Models
         [Display(Name = "Ім'я")]
         public string Name { get; set; }
 
-        [Phone(ErrorMessage = "Некоректний номер телефону"), StringLength(30, ErrorMessage = "Номер телефону задовгий")]
+        [RegularExpression(PhoneNumbers.Pattern, ErrorMessage = PhoneNumbers.Error), StringLength(30, ErrorMessage = "Номер телефону задовгий")]
         [Display(Name = "Телефон")]
         public string PhoneNumber { get; set; }
 
@@ -48,7 +48,7 @@ namespace ASTCUSA.Models
         [Display(Name = "E-mail")]
         public string Email { get; set; }
 
-        [Phone(ErrorMessage = "Некоректний номер телефону"), StringLength(30, ErrorMessage = "Номер телефону задовгий")]
+        [RegularExpression(PhoneNumbers.Pattern, ErrorMessage = PhoneNumbers.Error), StringLength(30, ErrorMessage = "Номер телефону задовгий")]
         [Display(Name = "Телефон")]
         public string PhoneNumber { get; set; }
 

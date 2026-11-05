@@ -29,6 +29,7 @@ namespace ASTCUSA.Models.Analytics
         [Display(Name = "Роль")]
         public string Role { get; set; }
 
+        [RegularExpression(PhoneNumbers.Pattern, ErrorMessage = PhoneNumbers.Error)]
         [StringLength(30, ErrorMessage = "Телефон задовгий (до 30 символів)")]
         [Display(Name = "Телефон (лише для клієнта)")]
         public string PhoneNumber { get; set; }
