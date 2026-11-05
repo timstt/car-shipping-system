@@ -160,24 +160,32 @@ The project is planned and tracked in **Jira** and documented in **Confluence**.
 
 ## Diagrams
 
-The code follows the UML diagrams in `docs/diagrams`.
+The UML diagrams in `docs/diagrams` match the code and each other:
+
+- actions of the client, manager and logistician on the activity diagram are use cases of that actor on the use case diagram;
+- states on the car state diagram are the values of `CarStatus`, and its transitions are named after the use cases that cause them;
+- classes, members and enumerations on the class diagram are taken from `CSS/Models`.
+
+Each PNG contains the diagram source, so it opens for editing in draw.io (diagrams.net).
 
 ### Use case diagram
 
 ![Use case diagram](docs/diagrams/OOPfirst.drawio.png)
 
-The PNG contains the diagram source, so it opens for editing in draw.io (diagrams.net).
-
 > The diagram mentions exporting the report to PDF / Excel; the implementation exports CSV, which opens in Excel, and the report page can be printed or saved as PDF from the browser.
 
 ### Class diagram
 
-![Class diagram](docs/diagrams/OOP3.webp)
+The domain model (`CSS/Models`). Navigation properties and foreign keys are shown as associations; controllers and view models are not shown.
+
+![Class diagram](docs/diagrams/OOP3.drawio.png)
 
 ### Activity diagram
 
-![Activity diagram](docs/diagrams/statediagram.webp)
+The order workflow. The «Система» lane shows what the application does automatically: status changes, the invoice, the tracking number and client notifications.
+
+![Activity diagram](docs/diagrams/statediagram.drawio.png)
 
 ### Car state diagram
 
-![Car state diagram](docs/diagrams/OOP4.webp)
+![Car state diagram](docs/diagrams/OOP4.drawio.png)
