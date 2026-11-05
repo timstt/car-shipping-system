@@ -164,9 +164,11 @@ The code follows the UML diagrams in `docs/diagrams`.
 
 ### Use case diagram
 
-![Use case diagram](docs/diagrams/OOPfirst.drawio.webp)
+![Use case diagram](docs/diagrams/OOPfirst.drawio.png)
 
-> The diagram mentions exporting the report to PDF / Excel; the implementation exports CSV, which opens in Excel.
+The PNG contains the diagram source, so it opens for editing in draw.io (diagrams.net).
+
+> The diagram mentions exporting the report to PDF / Excel; the implementation exports CSV, which opens in Excel, and the report page can be printed or saved as PDF from the browser.
 
 ### Class diagram
 
