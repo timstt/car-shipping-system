@@ -21,6 +21,7 @@ namespace ASTCUSA.Models.Analytics
 
         [Required(ErrorMessage = "Вкажіть e-mail")]
         [EmailAddress(ErrorMessage = "Некоректний e-mail")]
+        [RegularExpression(Credentials.EmailPattern, ErrorMessage = Credentials.EmailError)]
         [StringLength(256, ErrorMessage = "E-mail задовгий")]
         [Display(Name = "E-mail")]
         public string Email { get; set; }

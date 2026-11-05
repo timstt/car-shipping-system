@@ -42,7 +42,7 @@
                     @Html.LabelFor(m => m.Password, new { @class = "form-label" })
                     @Html.PasswordFor(m => m.Password, new { @class = "form-control", autocomplete = "new-password" })
                     @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger small" })
-                    <div class="form-text">Щонайменше 8 символів.</div>
+                    <div class="form-text">Щонайменше 8 символів: латинські літери, цифри, символи.</div>
                 </div>
                 <div class="col-md-6">
                     @Html.LabelFor(m => m.ConfirmPassword, new { @class = "form-label" })

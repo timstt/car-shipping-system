@@ -36,6 +36,19 @@ namespace ASTCUSA.Models
         public int OrdersCount { get; set; }
     }
 
+    // Правила для логіна (e-mail) і пароля: лише латиниця. Шаблони перевіряються атрибутом
+    // [RegularExpression] і в браузері, і на сервері, тож обійти їх запитом в обхід форми не вийде.
+    public static class Credentials
+    {
+        // Латинський e-mail з крапкою в домені: name@mail.com
+        public const string EmailPattern = @"^[A-Za-z0-9._%+\-]+@[A-Za-z0-9\-]+(\.[A-Za-z0-9\-]+)*\.[A-Za-z]{2,}$";
+        public const string EmailError = "Вкажіть e-mail латиницею, наприклад name@mail.com";
+
+        // Пароль: латинські літери, цифри й символи ASCII (! # $ % тощо), без пробілів і кирилиці
+        public const string PasswordPattern = @"^[\x21-\x7E]+$";
+        public const string PasswordError = "Пароль може містити лише латинські літери, цифри та символи, без пробілів";
+    }
+
     // Реєстрація доступна лише для ролі «Клієнт»
     public class RegisterViewModel
     {
@@ -44,6 +57,7 @@ namespace ASTCUSA.Models
         public string Name { get; set; }
 
         [Required(ErrorMessage = "Вкажіть e-mail"), EmailAddress(ErrorMessage = "Некоректний e-mail")]
+        [RegularExpression(Credentials.EmailPattern, ErrorMessage = Credentials.EmailError)]
         [StringLength(256, ErrorMessage = "E-mail задовгий")]
         [Display(Name = "E-mail")]
         public string Email { get; set; }
@@ -58,6 +72,7 @@ namespace ASTCUSA.Models
 
         [Required(ErrorMessage = "Вкажіть пароль")]
         [StringLength(100, MinimumLength = 8, ErrorMessage = "Пароль має містити щонайменше 8 символів")]
+        [RegularExpression(Credentials.PasswordPattern, ErrorMessage = Credentials.PasswordError)]
         [DataType(DataType.Password)]
         [Display(Name = "Пароль")]
         public string Password { get; set; }
