@@ -162,6 +162,7 @@
     <Compile Include="Models\Insurance.cs" />
     <Compile Include="Models\Invoice.cs" />
     <Compile Include="Models\Order.cs" />
+    <Compile Include="Models\OrderDocument.cs" />
     <Compile Include="Models\PasswordHasher.cs" />
     <Compile Include="Models\PhoneNumbers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -174,6 +175,10 @@
     <Compile Include="Migrations\202611041658452_AddConcurrencyTokensAndUniqueVin.cs" />
     <Compile Include="Migrations\202611041658452_AddConcurrencyTokensAndUniqueVin.Designer.cs">
       <DependentUpon>202611041658452_AddConcurrencyTokensAndUniqueVin.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202611071059581_AddOrderDocuments.cs" />
+    <Compile Include="Migrations\202611071059581_AddOrderDocuments.Designer.cs">
+      <DependentUpon>202611071059581_AddOrderDocuments.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -277,6 +282,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202611041658452_AddConcurrencyTokensAndUniqueVin.resx">
       <DependentUpon>202611041658452_AddConcurrencyTokensAndUniqueVin.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202611071059581_AddOrderDocuments.resx">
+      <DependentUpon>202611071059581_AddOrderDocuments.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

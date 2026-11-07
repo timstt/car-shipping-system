@@ -103,11 +103,21 @@ namespace ASTCUSA.Models
             return true;
         }
 
-        // provideDocuments(order: Order): void
-        public void ProvideDocuments(Order order)
+        // provideDocuments(order: Order, documents): void — прикріпити файли, які запитав менеджер
+        public void ProvideDocuments(Order order, ICollection<OrderDocument> documents)
         {
             if (order.Status != OrderStatus.DocumentsRequested)
                 throw new InvalidOperationException("Документи не запитувалися.");
+            if (documents == null || documents.Count == 0)
+                throw new ArgumentException("Прикріпіть хоча б один файл.");
+            if (documents.Count > OrderDocument.MaxFiles)
+                throw new ArgumentException("За один раз можна прикріпити не більше " + OrderDocument.MaxFiles + " файлів.");
+            if (order.Documents == null) order.Documents = new List<OrderDocument>();
+            foreach (var document in documents)
+            {
+                document.OrderId = order.OrderId;
+                order.Documents.Add(document);
+            }
             order.UpdateStatus(OrderStatus.DocumentsProvided);
         }
 
@@ -149,11 +159,17 @@ namespace ASTCUSA.Models
             order.UpdateStatus(OrderStatus.InProgress);
         }
 
-        // requestDocuments(order: Order): void
-        public void RequestDocuments(Order order)
+        // requestDocuments(order: Order, note: String): void — у заявці в роботі або повторно, коли надані
+        // документи не підходять. Текст запиту пояснює клієнту, що саме треба надати.
+        public void RequestDocuments(Order order, string note)
         {
-            if (order.Status != OrderStatus.InProgress)
-                throw new InvalidOperationException("Документи можна запитати лише для заявки в роботі.");
+            if (order.Status != OrderStatus.InProgress && order.Status != OrderStatus.DocumentsProvided)
+                throw new InvalidOperationException("Документи можна запитати лише для заявки в роботі або після надання документів.");
+            if (string.IsNullOrWhiteSpace(note))
+                throw new ArgumentException("Вкажіть, які документи потрібні.");
+            note = note.Trim();
+            if (note.Length > 1000) throw new ArgumentException("Запит задовгий (до 1000 символів).");
+            order.DocumentsRequestNote = note;
             order.UpdateStatus(OrderStatus.DocumentsRequested);
         }
 

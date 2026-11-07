@@ -62,6 +62,14 @@ namespace ASTCUSA.Models
         [Display(Name = "Відгук")]
         public string Review { get; set; }
 
+        // Останній запит менеджера: які документи потрібні від клієнта
+        [StringLength(1000)]
+        [Display(Name = "Запит документів")]
+        public string DocumentsRequestNote { get; set; }
+
+        // Order 1 — 0..* OrderDocument («має документи»): файли, які клієнт надав на запит менеджера
+        public virtual ICollection<OrderDocument> Documents { get; set; }
+
         // Версія рядка (SQL rowversion): захищає від втрачених оновлень, коли заявку одночасно
         // змінюють клієнт і менеджер/логіст — друге збереження отримає DbUpdateConcurrencyException
         [Timestamp]

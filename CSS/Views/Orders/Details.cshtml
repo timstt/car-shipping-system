@@ -85,6 +85,36 @@
             </ul>
         </div>
 
+        @* ---------- Документи клієнта ---------- *@
+        @{ var documents = (IList<OrderDocument>)ViewBag.Documents ?? new List<OrderDocument>(); }
+        @if (documents.Any() || !string.IsNullOrEmpty(Model.DocumentsRequestNote))
+        {
+            <div class="card mb-3">
+                <div class="card-header fw-semibold">Документи</div>
+                @if (!string.IsNullOrEmpty(Model.DocumentsRequestNote))
+                {
+                    <div class="card-body py-2 small border-bottom">
+                        <span class="text-muted">Останній запит менеджера:</span> @Model.DocumentsRequestNote
+                    </div>
+                }
+                <ul class="list-group list-group-flush">
+                    @if (!documents.Any())
+                    {
+                        <li class="list-group-item text-muted">Клієнт ще не надав документів</li>
+                    }
+                    @foreach (var doc in documents)
+                    {
+                        <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <span>
+                                @Html.ActionLink(doc.FileName, "Document", new { id = doc.OrderDocumentId }, new { target = "_blank", rel = "noopener" })
+                                <small class="text-muted ms-1">@OrderDocument.FormatSize(doc.Size), @doc.UploadedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                            </span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+
         @* ---------- Інвойс ---------- *@
         @if (invoice != null)
         {
@@ -151,10 +181,18 @@
                 {
                     if (s == OrderStatus.DocumentsRequested)
                     {
-                        <div class="alert alert-warning small mb-0">Менеджер запитав додаткові документи.</div>
-                        using (Html.BeginForm("ProvideDocuments", "Orders", new { id = Model.OrderId }, FormMethod.Post, new { @class = "d-grid" }))
+                        <div class="alert alert-warning small mb-0">
+                            Менеджер запитав документи@(string.IsNullOrEmpty(Model.DocumentsRequestNote) ? "." : ":")
+                            @if (!string.IsNullOrEmpty(Model.DocumentsRequestNote))
+                            {
+                                <div class="fw-semibold mt-1">@Model.DocumentsRequestNote</div>
+                            }
+                        </div>
+                        using (Html.BeginForm("ProvideDocuments", "Orders", new { id = Model.OrderId }, FormMethod.Post, new { @class = "d-grid gap-1", enctype = "multipart/form-data" }))
                         {
                             @Html.AntiForgeryToken()
+                            <label class="form-label small mb-0" for="files">Файли PDF, JPG або PNG, до 5 МБ кожен (до @OrderDocument.MaxFiles файлів)</label>
+                            <input class="form-control form-control-sm" type="file" id="files" name="files" multiple required accept="@OrderDocument.AllowedExtensions" />
                             <button type="submit" class="btn btn-warning">Надати документи</button>
                         }
                     }
@@ -227,10 +265,17 @@
                     if (s == OrderStatus.InProgress)
                     {
                         @Html.ActionLink("Взяти участь в аукціоні", "PlaceBid", new { id = Model.OrderId }, new { @class = "btn btn-primary" })
-                        using (Html.BeginForm("RequestDocuments", "Orders", new { id = Model.OrderId }, FormMethod.Post, new { @class = "d-grid" }))
+                    }
+                    if (s == OrderStatus.InProgress || s == OrderStatus.DocumentsProvided)
+                    {
+                        @* Запит документів; після надання — повторний, якщо документи не підходять *@
+                        using (Html.BeginForm("RequestDocuments", "Orders", new { id = Model.OrderId }, FormMethod.Post, new { @class = "d-grid gap-1" }))
                         {
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-outline-warning">Запитати додаткові документи</button>
+                            <label class="form-label small mb-0" for="note">@(s == OrderStatus.DocumentsProvided ? "Документи не підходять? Що надати ще:" : "Які документи потрібні:")</label>
+                            <textarea class="form-control form-control-sm" id="note" name="note" rows="3" maxlength="1000" required
+                                      placeholder="Наприклад: скан паспорта та ІПН"></textarea>
+                            <button type="submit" class="btn btn-outline-warning">@(s == OrderStatus.DocumentsProvided ? "Запитати документи ще раз" : "Запитати додаткові документи")</button>
                         }
                     }
                     if (s == OrderStatus.BidWon && invoice == null)

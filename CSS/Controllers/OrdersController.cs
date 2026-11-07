@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
+using System.Web;
 using System.Web.Mvc;
 using ASTCUSA.Models;
 
@@ -149,6 +151,12 @@ namespace ASTCUSA.Controllers
             if (id == null) return OrderNotFound();
             var order = FindAccessibleOrder(id.Value);
             if (order == null) return OrderNotFound();
+            // Перелік документів без вмісту файлів: самі файли віддає дія Document
+            ViewBag.Documents = db.OrderDocuments.Where(d => d.OrderId == order.OrderId)
+                .OrderBy(d => d.UploadedAt)
+                .Select(d => new { d.OrderDocumentId, d.FileName, d.Size, d.UploadedAt }).ToList()
+                .Select(d => new OrderDocument { OrderDocumentId = d.OrderDocumentId, FileName = d.FileName, Size = d.Size, UploadedAt = d.UploadedAt })
+                .ToList();
             return View(order);
         }
 
@@ -287,15 +295,43 @@ namespace ASTCUSA.Controllers
             }, "Заявку скасовано.");
         }
 
-        // POST: Orders/ProvideDocuments/5 — «Надати документи» (клієнт)
+        // POST: Orders/ProvideDocuments/5 — «Надати документи» (клієнт): прикріпити файли PDF / JPG / PNG.
+        // Файли й новий статус заявки зберігаються одним SaveChanges, тобто однією транзакцією.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AllowRoles(UserRole.Client)]
-        public ActionResult ProvideDocuments(int id)
+        public ActionResult ProvideDocuments(int id, IEnumerable<HttpPostedFileBase> files)
         {
             var order = FindAccessibleOrder(id);
             if (order == null) return OrderNotFound();
-            return Run(id, () => CurrentClient.ProvideDocuments(order), "Документи надано, менеджер перевірить їх.");
+            return Run(id, () =>
+            {
+                var documents = new List<OrderDocument>();
+                foreach (var file in (files ?? Enumerable.Empty<HttpPostedFileBase>()).Where(f => f != null && f.ContentLength > 0))
+                {
+                    if (file.ContentLength > OrderDocument.MaxSize)
+                        throw new ArgumentException("Файл «" + System.IO.Path.GetFileName(file.FileName) + "» більший за 5 МБ.");
+                    using (var buffer = new System.IO.MemoryStream())
+                    {
+                        file.InputStream.CopyTo(buffer);
+                        documents.Add(OrderDocument.FromUpload(file.FileName, buffer.ToArray()));
+                    }
+                }
+                CurrentClient.ProvideDocuments(order, documents);
+            }, "Документи надано, менеджер перевірить їх.");
+        }
+
+        // GET: Orders/Document/7 — переглянути або завантажити документ заявки.
+        // Доступ той самий, що й до заявки: клієнт — лише до своїх, менеджер — до всіх.
+        [HttpGet]
+        public ActionResult Document(int id)
+        {
+            var document = db.OrderDocuments.Find(id);
+            if (document == null || FindAccessibleOrder(document.OrderId) == null) return OrderNotFound();
+            // Тип береться з перевіреної сигнатури файлу; браузер не вгадує його сам (nosniff)
+            Response.AppendHeader("X-Content-Type-Options", "nosniff");
+            Response.AppendHeader("Content-Disposition", "inline; filename*=UTF-8''" + Uri.EscapeDataString(document.FileName));
+            return File(document.Content, document.ContentType);
         }
 
         // GET: Orders/AddInsurance/5 — «Додати страховий пакет» (extend «Створити заявку»)
@@ -461,15 +497,15 @@ namespace ASTCUSA.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AllowRoles(UserRole.Manager)]
-        public ActionResult RequestDocuments(int id)
+        public ActionResult RequestDocuments(int id, string note)
         {
             var order = FindAccessibleOrder(id);
             if (order == null) return OrderNotFound();
             return Run(id, () =>
             {
                 var manager = CurrentManager;
-                manager.RequestDocuments(order);
-                manager.NotifyClient(order.Client, "За заявкою №" + order.OrderId + " потрібні додаткові документи.");
+                manager.RequestDocuments(order, note);
+                manager.NotifyClient(order.Client, "За заявкою №" + order.OrderId + " потрібні документи: " + order.DocumentsRequestNote);
             }, "Клієнту надіслано запит на документи.");
         }
 
