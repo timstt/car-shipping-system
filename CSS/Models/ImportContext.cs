@@ -17,5 +17,6 @@ namespace ASTCUSA.Models
         public DbSet<Invoice> Invoices { get; set; }
         public DbSet<Delivery> Deliveries { get; set; }
         public DbSet<OrderDocument> OrderDocuments { get; set; }
+        public DbSet<AuctionBid> AuctionBids { get; set; }
     }
 }

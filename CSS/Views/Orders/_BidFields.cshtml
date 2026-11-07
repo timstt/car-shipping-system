@@ -1,0 +1,32 @@
+﻿@model AuctionBid
+@* Поля ставки: спільні для запису нової ставки та її зміни *@
+@if (ViewData.ModelState.ContainsKey("") && ViewData.ModelState[""].Errors.Count > 0)
+{
+    @Html.ValidationSummary(true, "", new { @class = "alert alert-danger py-2" })
+}
+<div class="row g-2">
+    <div class="col-sm-4">
+        <label class="form-label" for="auction">Аукціон</label>
+        <select class="form-select" id="auction" name="auction" required>
+            @foreach (var a in AuctionBid.Auctions)
+            {
+                <option value="@a" selected="@(a == Model.Auction)">@a</option>
+            }
+        </select>
+    </div>
+    <div class="col-sm-4">
+        <label class="form-label" for="lotNumber">Номер лоту</label>
+        <input type="text" class="form-control" id="lotNumber" name="lotNumber" value="@Model.LotNumber"
+               maxlength="30" pattern="[A-Za-z0-9\-]+" required placeholder="Наприклад: 41234567" />
+    </div>
+    <div class="col-sm-4">
+        <label class="form-label" for="amount">Сума ставки, $</label>
+        <input type="number" class="form-control" id="amount" name="amount" min="1" step="1" required
+               value="@(Model.Amount > 0 ? Model.Amount.ToString("0") : "")" />
+    </div>
+    <div class="col-12">
+        <label class="form-label" for="lotUrl">Посилання на лот</label>
+        <input type="url" class="form-control" id="lotUrl" name="lotUrl" value="@Model.LotUrl" maxlength="500" required
+               placeholder="https://www.copart.com/lot/41234567" />
+    </div>
+</div>

@@ -2,6 +2,10 @@
 @{
     ViewBag.Title = "Аукціон — заявка №" + Model.OrderId;
     bool budgetOk = Model.Car.AuctionPrice <= Model.MaxBudget;
+    var bids = (List<AuctionBid>)ViewBag.Bids;
+    var form = (AuctionBid)ViewBag.Form;
+    var pending = bids.FirstOrDefault(b => b.Result == BidResult.Pending);
+    double lastOutbid = bids.Where(b => b.Result == BidResult.Outbid).Select(b => b.Amount).DefaultIfEmpty(0).Max();
 }
 
 <h1 class="h3 mb-3">Взяти участь в аукціоні</h1>
@@ -14,29 +18,56 @@
     </div>
 </div>
 
-@if (!budgetOk)
+@Html.Partial("_Bids", bids)
+
+@if (!budgetOk && !bids.Any())
 {
     <div class="alert alert-danger">
         Бюджет клієнта не дозволяє взяти участь у торгах. Підтвердіть, щоб сповістити клієнта про неуспішну ставку.
     </div>
+    using (Html.BeginForm("PlaceBid", "Orders", new { id = Model.OrderId }, FormMethod.Post, new { @class = "d-flex gap-2" }))
+    {
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-danger">Сповістити клієнта</button>
+        @Html.ActionLink("Скасувати", "Details", new { id = Model.OrderId }, new { @class = "btn btn-outline-secondary" })
+    }
+}
+else if (pending != null)
+{
+    <div class="card card-body">
+        <p class="mb-2">Ставка <strong>$@pending.Amount.ToString("N0")</strong> на @pending.Auction (лот @pending.LotNumber) очікує результату торгів.
+            Вкажіть результат після завершення торгів на сайті аукціону.</p>
+        <div class="d-flex flex-wrap gap-2">
+            @foreach (var r in new[] { BidResult.Won, BidResult.Outbid, BidResult.Lost })
+            {
+                using (Html.BeginForm("SetBidResult", "Orders", new { id = pending.AuctionBidId }, FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="result" value="@r" />
+                    <button type="submit" class="btn @(r == BidResult.Won ? "btn-success" : r == BidResult.Lost ? "btn-danger" : "btn-outline-secondary")">@r.GetDisplayName()</button>
+                }
+            }
+            @Html.ActionLink("Змінити ставку", "EditBid", new { id = pending.AuctionBidId }, new { @class = "btn btn-outline-primary" })
+            @Html.ActionLink("До заявки", "Details", new { id = Model.OrderId }, new { @class = "btn btn-outline-secondary" })
+        </div>
+    </div>
 }
 else
 {
-    <p class="text-muted small">Ставка, не менша за ціну на аукціоні, виграє. Ставка не може перевищувати бюджет клієнта.</p>
-}
-
-@using (Html.BeginForm("PlaceBid", "Orders", new { id = Model.OrderId }, FormMethod.Post, new { @class = "card card-body" }))
-{
-    @Html.AntiForgeryToken()
-    if (budgetOk)
+    <p class="text-muted small">
+        Зробіть ставку на сайті аукціону й запишіть її тут. Ставка не може перевищувати бюджет клієнта
+        @if (lastOutbid > 0)
+        {
+            <text>і має бути більшою за перебиту ($@lastOutbid.ToString("N0"))</text>
+        }.
+    </p>
+    using (Html.BeginForm("PlaceBid", "Orders", new { id = Model.OrderId }, FormMethod.Post, new { @class = "card card-body" }))
     {
-        <label class="form-label" for="bidAmount">Сума ставки, $</label>
-        <input type="number" class="form-control mb-1" id="bidAmount" name="bidAmount" min="1" max="@Model.MaxBudget" step="1"
-               value="@Model.Car.AuctionPrice" required />
-        @Html.ValidationMessage("bidAmount", "", new { @class = "text-danger small" })
+        @Html.AntiForgeryToken()
+        @Html.Partial("_BidFields", form)
+        <div class="mt-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Записати ставку</button>
+            @Html.ActionLink("Скасувати", "Details", new { id = Model.OrderId }, new { @class = "btn btn-outline-secondary" })
+        </div>
     }
-    <div class="mt-3 d-flex gap-2">
-        <button type="submit" class="btn @(budgetOk ? "btn-primary" : "btn-danger")">@(budgetOk ? "Зробити ставку" : "Сповістити клієнта")</button>
-        @Html.ActionLink("Скасувати", "Details", new { id = Model.OrderId }, new { @class = "btn btn-outline-secondary" })
-    </div>
 }

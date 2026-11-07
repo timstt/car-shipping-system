@@ -163,6 +163,7 @@
     <Compile Include="Models\Invoice.cs" />
     <Compile Include="Models\Order.cs" />
     <Compile Include="Models\OrderDocument.cs" />
+    <Compile Include="Models\AuctionBid.cs" />
     <Compile Include="Models\PasswordHasher.cs" />
     <Compile Include="Models\PhoneNumbers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -179,6 +180,10 @@
     <Compile Include="Migrations\202611071059581_AddOrderDocuments.cs" />
     <Compile Include="Migrations\202611071059581_AddOrderDocuments.Designer.cs">
       <DependentUpon>202611071059581_AddOrderDocuments.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202611071127116_AddAuctionBids.cs" />
+    <Compile Include="Migrations\202611071127116_AddAuctionBids.Designer.cs">
+      <DependentUpon>202611071127116_AddAuctionBids.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -254,6 +259,9 @@
     <Content Include="Views\Orders\Index.cshtml" />
     <Content Include="Views\Orders\Mandate.cshtml" />
     <Content Include="Views\Orders\PlaceBid.cshtml" />
+    <Content Include="Views\Orders\EditBid.cshtml" />
+    <Content Include="Views\Orders\_Bids.cshtml" />
+    <Content Include="Views\Orders\_BidFields.cshtml" />
     <Content Include="Views\Orders\TrackDelivery.cshtml" />
     <Content Include="Views\Reports\Index.cshtml" />
     <Content Include="Views\Analytics\_AnalyticsNav.cshtml" />
@@ -285,6 +293,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202611071059581_AddOrderDocuments.resx">
       <DependentUpon>202611071059581_AddOrderDocuments.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202611071127116_AddAuctionBids.resx">
+      <DependentUpon>202611071127116_AddAuctionBids.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

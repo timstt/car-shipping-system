@@ -1,0 +1,44 @@
+﻿@model IEnumerable<AuctionBid>
+@{
+    var role = (UserRole)ViewBag.CurrentRole;
+}
+@* Історія ставок на аукціоні: бачать усі, хто має доступ до заявки *@
+@if (Model.Any())
+{
+    <div class="card mb-3">
+        <div class="card-header fw-semibold">Аукціон: історія ставок</div>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <thead>
+                    <tr><th>Дата</th><th>Аукціон</th><th>Лот</th><th class="text-end">Ставка</th><th>Результат</th>
+                        @if (role == UserRole.Manager) { <th></th> }</tr>
+                </thead>
+                <tbody>
+                    @foreach (var b in Model)
+                    {
+                        <tr>
+                            <td class="small">@b.PlacedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@b.Auction</td>
+                            <td><a href="@b.LotUrl" target="_blank" rel="noopener noreferrer">@b.LotNumber</a></td>
+                            <td class="text-end">$@b.Amount.ToString("N0")</td>
+                            <td><span class="badge @AuctionBid.BadgeClass(b.Result)">@b.Result.GetDisplayName()</span></td>
+                            @if (role == UserRole.Manager)
+                            {
+                                <td class="text-end">
+                                    @if (b.Result == BidResult.Pending || b.Result == BidResult.Outbid)
+                                    {
+                                        using (Html.BeginForm("DeleteBid", "Orders", new { id = b.AuctionBidId }, FormMethod.Post, new { @class = "d-inline", onsubmit = "return confirm('Вилучити цю ставку?');" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Вилучити</button>
+                                        }
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

@@ -70,6 +70,9 @@ namespace ASTCUSA.Models
         // Order 1 — 0..* OrderDocument («має документи»): файли, які клієнт надав на запит менеджера
         public virtual ICollection<OrderDocument> Documents { get; set; }
 
+        // Order 1 — 0..* AuctionBid («має ставки»): історія ставок менеджера на аукціоні
+        public virtual ICollection<AuctionBid> Bids { get; set; }
+
         // Версія рядка (SQL rowversion): захищає від втрачених оновлень, коли заявку одночасно
         // змінюють клієнт і менеджер/логіст — друге збереження отримає DbUpdateConcurrencyException
         [Timestamp]

@@ -173,15 +173,79 @@ namespace ASTCUSA.Models
             order.UpdateStatus(OrderStatus.DocumentsRequested);
         }
 
-        // placeBid(car: Car, amount: double): bool — Доступно → Аукціон → Зарезервовано / Продано іншому
-        public bool PlaceBid(Car car, double amount)
+        // placeBid(order, auction, lotNumber, lotUrl, amount): AuctionBid — менеджер зробив ставку на сайті
+        // аукціону й записує її. Поки торги тривають, авто має статус «Аукціон».
+        public AuctionBid PlaceBid(Order order, string auction, string lotNumber, string lotUrl, double amount)
         {
-            if (car.Status != CarStatus.Available)
-                throw new InvalidOperationException("Авто недоступне для аукціону.");
-            car.Status = CarStatus.Auction;
-            bool won = amount >= car.AuctionPrice;
-            car.Status = won ? CarStatus.Reserved : CarStatus.SoldToOther;
-            return won;
+            CheckCanBid(order);
+            var bids = order.Bids ?? (order.Bids = new List<AuctionBid>());
+            if (bids.Any(b => b.Result == BidResult.Pending))
+                throw new InvalidOperationException("Спершу вкажіть результат попередньої ставки.");
+            if (amount > order.MaxBudget)
+                throw new ArgumentException("Ставка не може перевищувати бюджет клієнта ($" + order.MaxBudget.ToString("N0") + ").");
+            double last = bids.Where(b => b.Result == BidResult.Outbid).Select(b => b.Amount).DefaultIfEmpty(0).Max();
+            if (amount <= last)
+                throw new ArgumentException("Нова ставка має бути більшою за перебиту ($" + last.ToString("N0") + ").");
+
+            var bid = new AuctionBid { OrderId = order.OrderId, Result = BidResult.Pending, PlacedAt = DateTime.Now };
+            bid.SetDetails(auction, lotNumber, lotUrl, amount);
+            bids.Add(bid);
+            order.Car.Status = CarStatus.Auction;
+            return bid;
+        }
+
+        // changeBid(...): void — виправити помилку в ставці, поки торги не завершено
+        public void ChangeBid(Order order, AuctionBid bid, string auction, string lotNumber, string lotUrl, double amount)
+        {
+            CheckCanBid(order);
+            if (bid.Result != BidResult.Pending)
+                throw new InvalidOperationException("Змінити можна лише ставку, яка очікує результату.");
+            if (amount > order.MaxBudget)
+                throw new ArgumentException("Ставка не може перевищувати бюджет клієнта ($" + order.MaxBudget.ToString("N0") + ").");
+            bid.SetDetails(auction, lotNumber, lotUrl, amount);
+        }
+
+        // setBidResult(order, bid, result): void — Аукціон → Доступно (перебито) / Зарезервовано / Продано іншому
+        public void SetBidResult(Order order, AuctionBid bid, BidResult result)
+        {
+            CheckCanBid(order);
+            if (bid.Result != BidResult.Pending)
+                throw new InvalidOperationException("Результат цієї ставки вже вказано.");
+            bid.Result = result;
+            switch (result)
+            {
+                case BidResult.Outbid:
+                    // Торги тривають: менеджер може поставити більше в межах бюджету
+                    order.Car.Status = CarStatus.Available;
+                    break;
+                case BidResult.Won:
+                    order.FinalPrice = bid.Amount;
+                    order.UpdateStatus(OrderStatus.BidWon);
+                    order.Car.Status = CarStatus.Reserved;
+                    break;
+                case BidResult.Lost:
+                    order.UpdateStatus(OrderStatus.BidLost);
+                    order.Car.Status = CarStatus.SoldToOther;
+                    break;
+                default:
+                    throw new ArgumentException("Оберіть результат торгів.");
+            }
+        }
+
+        // removeBid(order, bid): void — вилучити помилково записану ставку (сам запис видаляє контролер)
+        public void RemoveBid(Order order, AuctionBid bid)
+        {
+            CheckCanBid(order);
+            if (bid.Result == BidResult.Won || bid.Result == BidResult.Lost)
+                throw new InvalidOperationException("Ставку із завершеними торгами вилучити не можна.");
+            if (bid.Result == BidResult.Pending) order.Car.Status = CarStatus.Available;
+            order.Bids.Remove(bid);
+        }
+
+        private static void CheckCanBid(Order order)
+        {
+            if (order.Status != OrderStatus.InProgress || order.Car == null)
+                throw new InvalidOperationException("Ставки можна вести лише для заявки в роботі з вибраним авто.");
         }
 
         // generateInvoice(order: Order): Invoice — сума дорівнює виграній ставці

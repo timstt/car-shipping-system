@@ -291,6 +291,9 @@ namespace ASTCUSA.Controllers
             {
                 if (!ClientCanEdit(order) && order.Status != OrderStatus.InProgress)
                     throw new InvalidOperationException("Заявку, за якою виграно ставку, скасувати не можна.");
+                // Ставку вже зроблено на сайті аукціону — її не відкликати, тож треба дочекатися результату
+                if (order.Bids != null && order.Bids.Any(b => b.Result == BidResult.Pending))
+                    throw new InvalidOperationException("Менеджер уже зробив ставку на аукціоні. Скасувати заявку можна після результату торгів.");
                 order.UpdateStatus(OrderStatus.Cancelled);
             }, "Заявку скасовано.");
         }
@@ -509,6 +512,11 @@ namespace ASTCUSA.Controllers
             }, "Клієнту надіслано запит на документи.");
         }
 
+        // ---------- Аукціон ----------
+        // Менеджер робить ставку на сайті аукціону (Copart, IAAI, Manheim), а тут записує лот, посилання,
+        // суму й результат торгів. Кожна дія зберігається одним SaveChanges (Run) і змінює заявку,
+        // тож RowVersion заявки не дасть двом менеджерам одночасно записати суперечливі результати.
+
         // GET: Orders/PlaceBid/5 — «Взяти участь в аукціоні»
         [HttpGet]
         [AllowRoles(UserRole.Manager)]
@@ -518,13 +526,13 @@ namespace ASTCUSA.Controllers
             if (order == null) return OrderNotFound();
             if (order.Status != OrderStatus.InProgress || order.Car == null)
                 return BackToOrder(id, "Ставку можна зробити лише для заявки в роботі з вибраним авто.");
-            return View(order);
+            return BidView(order, null);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AllowRoles(UserRole.Manager)]
-        public ActionResult PlaceBid(int id, double? bidAmount)
+        public ActionResult PlaceBid(int id, string auction, string lotNumber, string lotUrl, double? amount)
         {
             var order = FindAccessibleOrder(id);
             if (order == null) return OrderNotFound();
@@ -536,53 +544,132 @@ namespace ASTCUSA.Controllers
             // «Бюджет дозволяє?» — ні: сповістити клієнта про неуспішну ставку
             if (order.Car.AuctionPrice > order.MaxBudget)
             {
-                order.UpdateStatus(OrderStatus.BidLost);
-                manager.NotifyClient(order.Client, string.Format(
-                    "Заявка №{0}: бюджет ${1:N0} менший за ціну авто ${2:N0}. Оберіть інше авто або змініть бюджет.",
-                    order.OrderId, order.MaxBudget, order.Car.AuctionPrice));
-                try
-                {
-                    db.SaveChanges();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    return BackToOrder(id, ConcurrencyMessage);
-                }
-                return BackToOrder(id, "Бюджет клієнта не дозволяє брати участь. Клієнта сповіщено.");
-            }
-
-            if (bidAmount == null || bidAmount <= 0)
-                ModelState.AddModelError("bidAmount", "Вкажіть суму ставки.");
-            else if (bidAmount > order.MaxBudget)
-                ModelState.AddModelError("bidAmount", "Ставка не може перевищувати бюджет клієнта.");
-            if (!ModelState.IsValid) return View(order);
-
-            try
-            {
-                bool won = manager.PlaceBid(order.Car, bidAmount.Value);
-                if (won)
-                {
-                    order.FinalPrice = bidAmount.Value;
-                    order.UpdateStatus(OrderStatus.BidWon);
-                }
-                else
+                return Run(id, () =>
                 {
                     order.UpdateStatus(OrderStatus.BidLost);
-                    manager.NotifyClient(order.Client, "Заявка №" + order.OrderId +
-                        ": ставку програно, авто продано іншому. Оберіть інше авто або скасуйте заявку.");
-                }
-                db.SaveChanges();
-                return BackToOrder(id, won ? "Ставку виграно! Авто зарезервовано." : "Ставку програно. Клієнта сповіщено.");
+                    manager.NotifyClient(order.Client, string.Format(
+                        "Заявка №{0}: бюджет ${1:N0} менший за ціну авто ${2:N0}. Оберіть інше авто або змініть бюджет.",
+                        order.OrderId, order.MaxBudget, order.Car.AuctionPrice));
+                }, "Бюджет клієнта не дозволяє брати участь. Клієнта сповіщено.");
+            }
+
+            var form = new AuctionBid { Auction = auction, LotNumber = lotNumber, LotUrl = lotUrl, Amount = amount ?? 0 };
+            try
+            {
+                manager.PlaceBid(order, auction, lotNumber, lotUrl, amount ?? 0);
+            }
+            catch (ArgumentException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return BidView(order, form);
             }
             catch (InvalidOperationException ex)
             {
                 return BackToOrder(id, ex.Message);
             }
-            catch (DbUpdateConcurrencyException)
+            return Run(id, () => TouchOrder(order), "Ставку записано. Після торгів вкажіть результат.");
+        }
+
+        // GET: Orders/EditBid/5 — виправити ставку, яка очікує результату
+        [HttpGet]
+        [AllowRoles(UserRole.Manager)]
+        public ActionResult EditBid(int id)
+        {
+            var bid = FindAccessibleBid(id);
+            if (bid == null) return OrderNotFound();
+            if (bid.Result != BidResult.Pending)
+                return BackToOrder(bid.OrderId, "Змінити можна лише ставку, яка очікує результату.");
+            return View(bid);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AllowRoles(UserRole.Manager)]
+        public ActionResult EditBid(int id, string auction, string lotNumber, string lotUrl, double? amount)
+        {
+            var bid = FindAccessibleBid(id);
+            if (bid == null) return OrderNotFound();
+            var order = bid.Order;
+            try
             {
-                // Клієнт тим часом скасував чи змінив заявку — ставку не збережено
-                return BackToOrder(id, ConcurrencyMessage);
+                CurrentManager.ChangeBid(order, bid, auction, lotNumber, lotUrl, amount ?? 0);
             }
+            catch (ArgumentException ex)
+            {
+                // Показати форму з введеними даними; невдалі зміни не зберігаються
+                db.Entry(bid).Reload();
+                ModelState.AddModelError("", ex.Message);
+                return View(new AuctionBid { AuctionBidId = bid.AuctionBidId, OrderId = bid.OrderId, Order = order,
+                    Auction = auction, LotNumber = lotNumber, LotUrl = lotUrl, Amount = amount ?? 0 });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BackToOrder(order.OrderId, ex.Message);
+            }
+            return Run(order.OrderId, () => TouchOrder(order), "Ставку змінено.");
+        }
+
+        // POST: Orders/SetBidResult/5 — результат торгів: перебито / виграно / програно
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AllowRoles(UserRole.Manager)]
+        public ActionResult SetBidResult(int id, BidResult result)
+        {
+            var bid = FindAccessibleBid(id);
+            if (bid == null) return OrderNotFound();
+            var order = bid.Order;
+            string message = result == Models.BidResult.Won ? "Ставку виграно! Авто зарезервовано."
+                           : result == Models.BidResult.Lost ? "Ставку програно. Клієнта сповіщено."
+                           : "Ставку перебито. Можна зробити нову ставку в межах бюджету.";
+            return Run(order.OrderId, () =>
+            {
+                var manager = CurrentManager;
+                manager.SetBidResult(order, bid, result);
+                if (result == Models.BidResult.Won)
+                    manager.NotifyClient(order.Client, string.Format(
+                        "Заявка №{0}: ставку ${1:N0} на {2} виграно. Очікуйте інвойс.", order.OrderId, bid.Amount, bid.Auction));
+                else if (result == Models.BidResult.Lost)
+                    manager.NotifyClient(order.Client, "Заявка №" + order.OrderId +
+                        ": ставку програно, авто продано іншому. Оберіть інше авто або скасуйте заявку.");
+                TouchOrder(order);
+            }, message);
+        }
+
+        // POST: Orders/DeleteBid/5 — вилучити помилково записану ставку
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AllowRoles(UserRole.Manager)]
+        public ActionResult DeleteBid(int id)
+        {
+            var bid = FindAccessibleBid(id);
+            if (bid == null) return OrderNotFound();
+            var order = bid.Order;
+            return Run(order.OrderId, () =>
+            {
+                CurrentManager.RemoveBid(order, bid);
+                db.AuctionBids.Remove(bid);
+                TouchOrder(order);
+            }, "Ставку вилучено.");
+        }
+
+        private ActionResult BidView(Order order, AuctionBid form)
+        {
+            ViewBag.Bids = (order.Bids ?? new List<AuctionBid>()).Where(b => b.AuctionBidId != 0)
+                .OrderBy(b => b.PlacedAt).ToList();
+            ViewBag.Form = form ?? new AuctionBid { Auction = AuctionBid.Auctions[0] };
+            return View("PlaceBid", order);
+        }
+
+        private AuctionBid FindAccessibleBid(int id)
+        {
+            var bid = db.AuctionBids.Find(id);
+            return bid != null && FindAccessibleOrder(bid.OrderId) != null ? bid : null;
+        }
+
+        // Позначити заявку зміненою: UPDATE з перевіркою RowVersion виявить паралельну зміну заявки
+        private void TouchOrder(Order order)
+        {
+            db.Entry(order).State = EntityState.Modified;
         }
 
         // POST: Orders/CreateInvoice/5 — «Ініціювати формування інвойсу». Сума = виграна ставка.

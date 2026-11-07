@@ -115,6 +115,9 @@
             </div>
         }
 
+        @* ---------- Аукціон ---------- *@
+        @Html.Partial("_Bids", (Model.Bids ?? new List<AuctionBid>()).OrderBy(b => b.PlacedAt).ToList())
+
         @* ---------- Інвойс ---------- *@
         @if (invoice != null)
         {
@@ -264,7 +267,7 @@
                     }
                     if (s == OrderStatus.InProgress)
                     {
-                        @Html.ActionLink("Взяти участь в аукціоні", "PlaceBid", new { id = Model.OrderId }, new { @class = "btn btn-primary" })
+                        @Html.ActionLink(Model.Bids != null && Model.Bids.Any(x => x.Result == BidResult.Pending) ? "Аукціон: вказати результат торгів" : "Взяти участь в аукціоні", "PlaceBid", new { id = Model.OrderId }, new { @class = "btn btn-primary" })
                     }
                     if (s == OrderStatus.InProgress || s == OrderStatus.DocumentsProvided)
                     {
