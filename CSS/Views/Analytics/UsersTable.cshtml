@@ -6,7 +6,13 @@
 
 @Html.Partial("_AnalyticsNav")
 <div class="d-flex justify-content-between align-items-center mb-2">
-    <span class="text-muted">Усього користувачів: @Model.Count</span>
+    <span class="text-muted">
+        Усього користувачів: @(((int)ViewBag.TotalCount).ToString("N0"))
+        @if ((int)ViewBag.TotalCount > Model.Count)
+        {
+            @:(показано перші @Model.Count)
+        }
+    </span>
     @Html.ActionLink("Додати користувача", "CreateUser", null, new { @class = "btn btn-success" })
 </div>
 <div class="table-responsive">

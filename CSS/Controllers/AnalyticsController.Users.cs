@@ -8,11 +8,15 @@ namespace ASTCUSA.Controllers
     // Таблиця Users: перегляд, додавання, зміна, видалення
     public partial class AnalyticsController
     {
+        private const int UsersTableLimit = 200;
+
         // GET: Analytics/UsersTable
         [HttpGet]
         public ActionResult UsersTable()
         {
-            return View(AnalyticsDb.Users.OrderBy(u => u.Id).ToList());
+            // Після заповнення до 100 000 записів (ЛР6) показуються лише перші UsersTableLimit
+            ViewBag.TotalCount = AnalyticsDb.Users.Count();
+            return View(AnalyticsDb.Users.OrderBy(u => u.Id).Take(UsersTableLimit).ToList());
         }
 
         // GET: Analytics/CreateUser

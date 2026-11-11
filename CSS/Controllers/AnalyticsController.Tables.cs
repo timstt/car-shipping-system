@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using ASTCUSA.Models;
+using ASTCUSA.Models.Analytics;
 
 namespace ASTCUSA.Controllers
 {
@@ -29,11 +30,13 @@ namespace ASTCUSA.Controllers
             return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
         }
 
-        // Користувачі певної ролі для списків вибору (клієнт, менеджер, логіст)
+        // Користувачі певної ролі для списків вибору (клієнт, менеджер, логіст).
+        // Записи, згенеровані для ЛР6 (до 100 000), у списки не потрапляють
         private IList<KeyValuePair<int, string>> UsersByRole(UserRole role)
         {
             string name = role.ToString();
-            return AnalyticsDb.Users.Where(u => u.Role == name).OrderBy(u => u.Name).ToList()
+            return AnalyticsDb.Users.Where(u => u.Role == name && !u.Email.EndsWith(UsersGenerator.GeneratedDomain))
+                .OrderBy(u => u.Name).ToList()
                 .Select(u => new KeyValuePair<int, string>(u.Id, u.Name + " (" + u.Email + ")")).ToList();
         }
 

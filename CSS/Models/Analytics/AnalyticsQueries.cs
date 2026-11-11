@@ -58,7 +58,8 @@ namespace ASTCUSA.Models.Analytics
 
         public IList<string> ClientEmails()
         {
-            return db.Users.Where(u => u.Role == "Client").OrderBy(u => u.Email).Select(u => u.Email).ToList();
+            return db.Users.Where(u => u.Role == "Client" && !u.Email.EndsWith(UsersGenerator.GeneratedDomain))
+                .OrderBy(u => u.Email).Select(u => u.Email).ToList();
         }
 
         // ---------- Сума оплачених інвойсів за період ----------

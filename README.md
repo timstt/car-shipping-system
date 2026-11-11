@@ -81,6 +81,7 @@ Besides the main database used by the app (EF Code First), the project has a **s
   - **Payments for a period** — sum and count of paid invoices for a chosen day, month or half-year.
   - **Deliveries** — by delivery status and customs state.
   - **Grouping** — order count and car prices grouped by order status or car make.
+  - **Parallelism** — runs one query on the `Users` table (Kyivstar clients with a valid Latin e-mail) sequentially and in parallel: PLINQ on a chosen number of cores, manual `Thread`s and TPL `Parallel.ForEach`, with average time and speed-up for each. Buttons fill `Users` up to 100 000 rows with generated clients (`SqlBulkCopy`, e-mails `@gen.test`) and remove them again. Generated clients are left out of the client drop-downs, and the `Users` table page shows the first 200 rows.
 - **Table management** tabs: add, edit and delete records in every table — `Users`, `Cars`, `Orders`, `Insurances`, `Invoices`, `Deliveries`.
   - Forms check the same rules as the database: unique e-mail / VIN / tracking number, one invoice and one delivery per order, client / manager / logistician chosen by role, a paid invoice must have a payment date.
   - A record that other records depend on cannot be deleted: a user or car linked to orders, or an order that has insurances, an invoice or a delivery. The page says which records block the deletion.
