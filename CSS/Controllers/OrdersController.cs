@@ -179,6 +179,8 @@ namespace ASTCUSA.Controllers
             Car car = form.CarId.HasValue ? FreeCars(null).FirstOrDefault(c => c.CarId == form.CarId.Value) : null;
             if (car == null)
                 ModelState.AddModelError("CarId", "Оберіть доступне авто з каталогу.");
+            else if (!Order.BudgetCovers(form.MaxBudget, car))
+                ModelState.AddModelError("MaxBudget", Order.BudgetError(car));
 
             if (ModelState.IsValid)
             {
@@ -247,6 +249,9 @@ namespace ASTCUSA.Controllers
                 if (newCar == null)
                     ModelState.AddModelError("CarId", "Оберіть доступне авто (попереднє вже недоступне).");
             }
+            Car chosenCar = newCar ?? (form.CarId == order.CarId ? order.Car : null);
+            if (chosenCar != null && !Order.BudgetCovers(form.MaxBudget, chosenCar))
+                ModelState.AddModelError("MaxBudget", Order.BudgetError(chosenCar));
 
             if (!ModelState.IsValid)
             {

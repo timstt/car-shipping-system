@@ -95,6 +95,17 @@ namespace ASTCUSA.Models
             MaxBudget = newBudget;
         }
 
+        // Бюджет має покривати ціну авто на аукціоні, інакше ставку за цим авто зробити не вийде
+        public static bool BudgetCovers(double budget, Car car)
+        {
+            return car == null || budget >= car.AuctionPrice;
+        }
+
+        public static string BudgetError(Car car)
+        {
+            return string.Format("Бюджет менший за ціну авто на аукціоні (${0:N0}). Збільште бюджет або оберіть інше авто.", car.AuctionPrice);
+        }
+
         // assignCar(car: Car): void
         public void AssignCar(Car car)
         {
