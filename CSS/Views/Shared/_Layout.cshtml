@@ -3,7 +3,11 @@
     var role = User.Identity.GetUserRole();
     string userName = User.Identity.GetDisplayName();
     string controller = ViewContext.RouteData.Values["controller"] as string;
-    Func<string, string> active = c => string.Equals(controller, c, StringComparison.OrdinalIgnoreCase) ? " active" : "";
+    string action = ViewContext.RouteData.Values["action"] as string;
+    bool onAuctions = string.Equals(controller, "Orders", StringComparison.OrdinalIgnoreCase) &&
+                      string.Equals(action, "Auctions", StringComparison.OrdinalIgnoreCase);
+    // «Аукціони» — окремий пункт меню, хоча це дія контролера Orders
+    Func<string, string> active = c => string.Equals(controller, c, StringComparison.OrdinalIgnoreCase) && !onAuctions ? " active" : "";
 }
 <!DOCTYPE html>
 <html lang="uk">
@@ -32,11 +36,13 @@
                             <li class="nav-item">@Html.ActionLink("Обране", "Favorites", "Cars", null, new { @class = "nav-link" })</li>
                             <li class="nav-item">@Html.ActionLink("Мої заявки", "Index", "Orders", null, new { @class = "nav-link" + active("Orders") })</li>
                             <li class="nav-item">@Html.ActionLink("Нова заявка", "Create", "Orders", null, new { @class = "nav-link" })</li>
+                            <li class="nav-item">@Html.ActionLink("Аукціони", "Auctions", "Orders", null, new { @class = "nav-link" + (onAuctions ? " active" : "") })</li>
                             <li class="nav-item">@Html.ActionLink("Мій профіль", "Index", "Profile", null, new { @class = "nav-link" + active("Profile") })</li>
                         }
                         else if (role == UserRole.Manager)
                         {
                             <li class="nav-item">@Html.ActionLink("Заявки", "Index", "Orders", null, new { @class = "nav-link" + active("Orders") })</li>
+                            <li class="nav-item">@Html.ActionLink("Аукціони", "Auctions", "Orders", null, new { @class = "nav-link" + (onAuctions ? " active" : "") })</li>
                             <li class="nav-item">@Html.ActionLink("Звітність", "Index", "Reports", null, new { @class = "nav-link" + active("Reports") })</li>
                             <li class="nav-item">@Html.ActionLink("Аналітика", "Cars", "Analytics", null, new { @class = "nav-link" + active("Analytics") })</li>
                         }

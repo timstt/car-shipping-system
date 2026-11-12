@@ -263,6 +263,7 @@
     <Content Include="Views\Orders\Mandate.cshtml" />
     <Content Include="Views\Orders\PlaceBid.cshtml" />
     <Content Include="Views\Orders\EditBid.cshtml" />
+    <Content Include="Views\Orders\Auctions.cshtml" />
     <Content Include="Views\Orders\_Bids.cshtml" />
     <Content Include="Views\Orders\_BidFields.cshtml" />
     <Content Include="Views\Orders\TrackDelivery.cshtml" />

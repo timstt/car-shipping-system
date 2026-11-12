@@ -144,6 +144,32 @@ namespace ASTCUSA.Controllers
             return View(orders.OrderByDescending(o => o.CreatedAt).ToList());
         }
 
+        // GET: Orders/Auctions — історія аукціонів: усі ставки з результатами торгів.
+        // Менеджер бачить ставки за всіма заявками, клієнт — лише за своїми.
+        [HttpGet]
+        [AllowRoles(UserRole.Client, UserRole.Manager)]
+        public ActionResult Auctions(BidResult? result)
+        {
+            int userId = CurrentUserId ?? 0;
+            var bids = db.AuctionBids.Include(b => b.Order.Car).Include(b => b.Order.Client);
+            if (CurrentRole == UserRole.Client)
+                bids = bids.Where(b => b.Order.ClientId == userId);
+
+            // Підсумок рахується за всіма ставками користувача, незалежно від фільтра
+            var counts = bids.GroupBy(b => b.Result)
+                .Select(g => new { Result = g.Key, Count = g.Count(), Sum = g.Sum(b => b.Amount) }).ToList();
+            ViewBag.Counts = counts.ToDictionary(c => c.Result, c => c.Count);
+            ViewBag.WonSum = counts.Where(c => c.Result == Models.BidResult.Won).Select(c => c.Sum).FirstOrDefault();
+
+            if (result.HasValue)
+            {
+                var r = result.Value;
+                bids = bids.Where(b => b.Result == r);
+            }
+            ViewBag.Result = result;
+            return View(bids.OrderByDescending(b => b.PlacedAt).ToList());
+        }
+
         // GET: Orders/Details/5
         [HttpGet]
         public ActionResult Details(int? id)
