@@ -6,7 +6,14 @@
 @if (Model.Any())
 {
     <div class="card mb-3">
-        <div class="card-header fw-semibold">Аукціон: історія ставок</div>
+        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <span class="fw-semibold">Аукціон: історія ставок</span>
+            @* Загальна сторінка «Аукціони» доступна лише клієнту й менеджеру *@
+            @if (role == UserRole.Client || role == UserRole.Manager)
+            {
+                @Html.ActionLink("Усі аукціони →", "Auctions", "Orders", null, new { @class = "small" })
+            }
+        </div>
         <div class="table-responsive">
             <table class="table table-sm align-middle mb-0">
                 <thead>
