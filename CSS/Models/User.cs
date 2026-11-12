@@ -232,14 +232,22 @@ namespace ASTCUSA.Models
             }
         }
 
-        // removeBid(order, bid): void — вилучити помилково записану ставку (сам запис видаляє контролер)
+        // removeBid(order, bid): void — вилучити помилково записану ставку (сам запис видаляє контролер).
+        // Перебиті, виграні й програні ставки справді були на аукціоні — це історія торгів, її не видаляємо.
+        // Інакше, вилучивши перебиту ставку, можна було б обійти правило «нова ставка більша за перебиту».
         public void RemoveBid(Order order, AuctionBid bid)
         {
             CheckCanBid(order);
-            if (bid.Result == BidResult.Won || bid.Result == BidResult.Lost)
-                throw new InvalidOperationException("Ставку із завершеними торгами вилучити не можна.");
-            if (bid.Result == BidResult.Pending) order.Car.Status = CarStatus.Available;
+            if (!CanRemoveBid(order, bid))
+                throw new InvalidOperationException("Вилучити можна лише ставку, яка очікує результату торгів.");
+            order.Car.Status = CarStatus.Available;
             order.Bids.Remove(bid);
+        }
+
+        // Чи можна вилучити ставку: лише ту, що очікує результату, у заявці в роботі
+        public static bool CanRemoveBid(Order order, AuctionBid bid)
+        {
+            return order.Status == OrderStatus.InProgress && bid.Result == BidResult.Pending;
         }
 
         private static void CheckCanBid(Order order)

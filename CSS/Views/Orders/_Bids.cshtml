@@ -32,7 +32,8 @@
                             @if (role == UserRole.Manager)
                             {
                                 <td class="text-end">
-                                    @if (b.Result == BidResult.Pending || b.Result == BidResult.Outbid)
+                                    @* Кнопка лише там, де вилучення спрацює: ставка очікує результату, заявка в роботі *@
+                                    @if (Manager.CanRemoveBid(b.Order, b))
                                     {
                                         using (Html.BeginForm("DeleteBid", "Orders", new { id = b.AuctionBidId }, FormMethod.Post, new { @class = "d-inline", onsubmit = "return confirm('Вилучити цю ставку?');" }))
                                         {
