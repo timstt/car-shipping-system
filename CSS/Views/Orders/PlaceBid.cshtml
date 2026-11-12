@@ -5,7 +5,7 @@
     var bids = (List<AuctionBid>)ViewBag.Bids;
     var form = (AuctionBid)ViewBag.Form;
     var pending = bids.FirstOrDefault(b => b.Result == BidResult.Pending);
-    double lastOutbid = bids.Where(b => b.Result == BidResult.Outbid).Select(b => b.Amount).DefaultIfEmpty(0).Max();
+    double highest = AuctionBid.HighestAmount(bids);
 }
 
 <h1 class="h3 mb-3">Взяти участь в аукціоні</h1>
@@ -37,16 +37,27 @@ else if (pending != null)
     <div class="card card-body">
         <p class="mb-2">Ставка <strong>$@pending.Amount.ToString("N0")</strong> на @pending.Auction (лот @pending.LotNumber) очікує результату торгів.
             Вкажіть результат після завершення торгів на сайті аукціону.</p>
-        <div class="d-flex flex-wrap gap-2">
-            @foreach (var r in new[] { BidResult.Won, BidResult.Outbid, BidResult.Lost })
+        <div class="d-flex flex-wrap align-items-end gap-3">
+            @using (Html.BeginForm("SetBidResult", "Orders", new { id = pending.AuctionBidId }, FormMethod.Post))
             {
-                using (Html.BeginForm("SetBidResult", "Orders", new { id = pending.AuctionBidId }, FormMethod.Post))
-                {
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="result" value="@r" />
-                    <button type="submit" class="btn @(r == BidResult.Won ? "btn-success" : r == BidResult.Lost ? "btn-danger" : "btn-outline-secondary")">@r.GetDisplayName()</button>
-                }
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="result" value="@BidResult.Won" />
+                <button type="submit" class="btn btn-success">@BidResult.Won.GetDisplayName()</button>
             }
+            @* Якщо нашу ставку перебили, менеджер вказує ставку іншого учасника з сайту аукціону *@
+            @using (Html.BeginForm("SetBidResult", "Orders", new { id = pending.AuctionBidId }, FormMethod.Post, new { @class = "d-flex flex-wrap align-items-end gap-2" }))
+            {
+                @Html.AntiForgeryToken()
+                <div>
+                    <label class="form-label small mb-0" for="competitorAmount">Ставка іншого учасника, $</label>
+                    <input type="number" class="form-control" id="competitorAmount" name="competitorAmount"
+                           min="@(pending.Amount + 1)" step="1" required style="max-width: 12rem" />
+                </div>
+                <button type="submit" name="result" value="@BidResult.Outbid" class="btn btn-outline-secondary">@BidResult.Outbid.GetDisplayName()</button>
+                <button type="submit" name="result" value="@BidResult.Lost" class="btn btn-danger">@BidResult.Lost.GetDisplayName()</button>
+            }
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-3">
             @Html.ActionLink("Змінити ставку", "EditBid", new { id = pending.AuctionBidId }, new { @class = "btn btn-outline-primary" })
             @Html.ActionLink("До заявки", "Details", new { id = Model.OrderId }, new { @class = "btn btn-outline-secondary" })
         </div>
@@ -56,9 +67,9 @@ else
 {
     <p class="text-muted small">
         Зробіть ставку на сайті аукціону й запишіть її тут. Ставка не може перевищувати бюджет клієнта
-        @if (lastOutbid > 0)
+        @if (highest > 0)
         {
-            <text>і має бути більшою за перебиту ($@lastOutbid.ToString("N0"))</text>
+            <text>і має бути більшою за найбільшу попередню ставку ($@highest.ToString("N0"))</text>
         }.
     </p>
     using (Html.BeginForm("PlaceBid", "Orders", new { id = Model.OrderId }, FormMethod.Post, new { @class = "card card-body" }))

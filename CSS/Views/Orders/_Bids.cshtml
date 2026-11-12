@@ -17,7 +17,7 @@
         <div class="table-responsive">
             <table class="table table-sm align-middle mb-0">
                 <thead>
-                    <tr><th>Дата</th><th>Аукціон</th><th>Лот</th><th class="text-end">Ставка</th><th>Результат</th>
+                    <tr><th>Дата</th><th>Учасник</th><th>Аукціон</th><th>Лот</th><th class="text-end">Ставка</th><th>Результат</th>
                         @if (role == UserRole.Manager) { <th></th> }</tr>
                 </thead>
                 <tbody>
@@ -25,6 +25,7 @@
                     {
                         <tr>
                             <td class="small">@b.PlacedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>Наша ставка</td>
                             <td>@b.Auction</td>
                             <td><a href="@b.LotUrl" target="_blank" rel="noopener noreferrer">@b.LotNumber</a></td>
                             <td class="text-end">$@b.Amount.ToString("N0")</td>
@@ -44,6 +45,19 @@
                                 </td>
                             }
                         </tr>
+                        @* Ставка іншого учасника, яка перебила нашу: аукціон не розкриває, хто це, тому лише сума *@
+                        if (b.CompetitorAmount.HasValue)
+                        {
+                            <tr class="table-light text-muted">
+                                <td class="small">—</td>
+                                <td>Інший учасник</td>
+                                <td>@b.Auction</td>
+                                <td>@b.LotNumber</td>
+                                <td class="text-end">$@b.CompetitorAmount.Value.ToString("N0")</td>
+                                <td><span class="badge bg-dark">@(b.Result == BidResult.Lost ? "Купив авто" : "Перебив нашу")</span></td>
+                                @if (role == UserRole.Manager) { <td></td> }
+                            </tr>
+                        }
                     }
                 </tbody>
             </table>

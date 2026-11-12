@@ -644,7 +644,7 @@ namespace ASTCUSA.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AllowRoles(UserRole.Manager)]
-        public ActionResult SetBidResult(int id, BidResult result)
+        public ActionResult SetBidResult(int id, BidResult result, double? competitorAmount)
         {
             var bid = FindAccessibleBid(id);
             if (bid == null) return OrderNotFound();
@@ -655,13 +655,14 @@ namespace ASTCUSA.Controllers
             return Run(order.OrderId, () =>
             {
                 var manager = CurrentManager;
-                manager.SetBidResult(order, bid, result);
+                manager.SetBidResult(order, bid, result, competitorAmount);
                 if (result == Models.BidResult.Won)
                     manager.NotifyClient(order.Client, string.Format(
                         "Заявка №{0}: ставку ${1:N0} на {2} виграно. Очікуйте інвойс.", order.OrderId, bid.Amount, bid.Auction));
                 else if (result == Models.BidResult.Lost)
-                    manager.NotifyClient(order.Client, "Заявка №" + order.OrderId +
-                        ": ставку програно, авто продано іншому. Оберіть інше авто або скасуйте заявку.");
+                    manager.NotifyClient(order.Client, string.Format(
+                        "Заявка №{0}: ставку програно, інший учасник поставив ${1:N0}, авто продано іншому. Оберіть інше авто або скасуйте заявку.",
+                        order.OrderId, bid.CompetitorAmount));
                 TouchOrder(order);
             }, message);
         }

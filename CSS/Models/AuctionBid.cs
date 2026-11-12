@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace ASTCUSA.Models
@@ -41,6 +43,19 @@ namespace ASTCUSA.Models
 
         [Display(Name = "Результат")]
         public BidResult Result { get; set; }
+
+        // Ставка іншого учасника, яка перебила нашу (для «Перебито» і «Програно»). Аукціони не розкривають,
+        // хто поставив, тому зберігається лише сума — менеджер бачить її на сайті аукціону.
+        [Display(Name = "Ставка іншого учасника, $")]
+        public double? CompetitorAmount { get; set; }
+
+        // Найбільша ставка за весь час торгів за заявкою: наша або іншого учасника. Нова ставка має бути більшою.
+        public static double HighestAmount(IEnumerable<AuctionBid> bids)
+        {
+            return bids.Where(b => b.Result != BidResult.Pending)
+                       .Select(b => Math.Max(b.Amount, b.CompetitorAmount ?? 0))
+                       .DefaultIfEmpty(0).Max();
+        }
 
         [Display(Name = "Дата ставки")]
         public DateTime PlacedAt { get; set; }

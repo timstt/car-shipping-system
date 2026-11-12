@@ -72,7 +72,8 @@ else
                     <th>Авто</th>
                     <th>Аукціон</th>
                     <th>Лот</th>
-                    <th class="text-end">Ставка, $</th>
+                    <th class="text-end">Наша ставка, $</th>
+                    <th class="text-end">Інший учасник, $</th>
                     <th>Результат</th>
                 </tr>
             </thead>
@@ -88,6 +89,7 @@ else
                         <td>@b.Auction</td>
                         <td><a href="@b.LotUrl" target="_blank" rel="noopener noreferrer">@b.LotNumber</a></td>
                         <td class="text-end">@b.Amount.ToString("N0")</td>
+                        <td class="text-end">@(b.CompetitorAmount.HasValue ? b.CompetitorAmount.Value.ToString("N0") : "—")</td>
                         <td><span class="badge @AuctionBid.BadgeClass(b.Result)">@b.Result.GetDisplayName()</span></td>
                     </tr>
                 }

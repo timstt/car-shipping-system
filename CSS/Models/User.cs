@@ -183,9 +183,11 @@ namespace ASTCUSA.Models
                 throw new InvalidOperationException("Спершу вкажіть результат попередньої ставки.");
             if (amount > order.MaxBudget)
                 throw new ArgumentException("Ставка не може перевищувати бюджет клієнта ($" + order.MaxBudget.ToString("N0") + ").");
-            double last = bids.Where(b => b.Result == BidResult.Outbid).Select(b => b.Amount).DefaultIfEmpty(0).Max();
-            if (amount <= last)
-                throw new ArgumentException("Нова ставка має бути більшою за перебиту ($" + last.ToString("N0") + ").");
+            // Як на справжньому аукціоні: нова ставка має бути більшою за найбільшу попередню,
+            // зокрема за ставку іншого учасника, яка перебила нашу
+            double highest = AuctionBid.HighestAmount(bids);
+            if (amount <= highest)
+                throw new ArgumentException("Нова ставка має бути більшою за найбільшу попередню ($" + highest.ToString("N0") + ").");
 
             var bid = new AuctionBid { OrderId = order.OrderId, Result = BidResult.Pending, PlacedAt = DateTime.Now };
             bid.SetDetails(auction, lotNumber, lotUrl, amount);
@@ -205,12 +207,21 @@ namespace ASTCUSA.Models
             bid.SetDetails(auction, lotNumber, lotUrl, amount);
         }
 
-        // setBidResult(order, bid, result): void — Аукціон → Доступно (перебито) / Зарезервовано / Продано іншому
-        public void SetBidResult(Order order, AuctionBid bid, BidResult result)
+        // setBidResult(order, bid, result, competitorAmount): void — Аукціон → Доступно (перебито) / Зарезервовано /
+        // Продано іншому. Якщо нашу ставку перебили, менеджер вказує суму ставки іншого учасника.
+        public void SetBidResult(Order order, AuctionBid bid, BidResult result, double? competitorAmount = null)
         {
             CheckCanBid(order);
             if (bid.Result != BidResult.Pending)
                 throw new InvalidOperationException("Результат цієї ставки вже вказано.");
+            if (result == BidResult.Outbid || result == BidResult.Lost)
+            {
+                if (competitorAmount == null)
+                    throw new ArgumentException("Вкажіть ставку іншого учасника, яка перебила нашу.");
+                if (competitorAmount <= bid.Amount)
+                    throw new ArgumentException("Ставка іншого учасника має бути більшою за нашу ($" + bid.Amount.ToString("N0") + ").");
+                bid.CompetitorAmount = competitorAmount;
+            }
             bid.Result = result;
             switch (result)
             {
