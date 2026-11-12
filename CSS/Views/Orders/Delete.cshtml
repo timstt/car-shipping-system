@@ -1,7 +1,7 @@
 ﻿@model Order
 @{
     ViewBag.Title = "Видалити заявку №" + Model.OrderId;
-    bool canDelete = ViewBag.CanDelete;
+    string deleteError = ViewBag.DeleteError;
 }
 
 <h1 class="h3 mb-3">Видалити заявку №@Model.OrderId?</h1>
@@ -14,9 +14,9 @@
     </div>
 </div>
 
-@if (!canDelete)
+@if (deleteError != null)
 {
-    <div class="alert alert-warning">Видалити можна лише нову, скасовану або програну заявку.</div>
+    <div class="alert alert-warning">@deleteError</div>
     @Html.ActionLink("← Назад", "Details", new { id = Model.OrderId }, new { @class = "btn btn-outline-secondary" })
 }
 else

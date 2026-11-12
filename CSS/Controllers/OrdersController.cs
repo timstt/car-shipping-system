@@ -763,14 +763,20 @@ namespace ASTCUSA.Controllers
             if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             var order = FindAccessibleOrder(id.Value);
             if (order == null) return OrderNotFound();
-            ViewBag.CanDelete = CanDelete(order);
+            ViewBag.DeleteError = DeleteError(order);
             return View(order);
         }
 
-        private static bool CanDelete(Order order)
+        // Чому заявку не можна видалити; null — можна
+        private static string DeleteError(Order order)
         {
-            return order.Status == OrderStatus.New || order.Status == OrderStatus.Cancelled ||
-                   order.Status == OrderStatus.BidLost;
+            if (order.Status != OrderStatus.New && order.Status != OrderStatus.Cancelled &&
+                order.Status != OrderStatus.BidLost)
+                return "Видалити можна лише нову, скасовану або програну заявку.";
+            // Ставки видалилися б разом із заявкою, і аукціон зник би з історії аукціонів
+            if (order.Bids != null && order.Bids.Any())
+                return "За заявкою були ставки на аукціоні. Її не можна видалити, щоб зберегти історію аукціонів.";
+            return null;
         }
 
         [HttpPost, ActionName("Delete")]
@@ -780,7 +786,8 @@ namespace ASTCUSA.Controllers
         {
             var order = FindAccessibleOrder(id);
             if (order == null) return OrderNotFound();
-            if (!CanDelete(order)) return BackToOrder(id, "Видалити можна лише нову, скасовану або програну заявку.");
+            string error = DeleteError(order);
+            if (error != null) return BackToOrder(id, error);
 
             // Залежні записи видаляються разом із заявкою в одному SaveChanges (одна транзакція)
             db.Insurances.RemoveRange(order.Insurances.ToList());

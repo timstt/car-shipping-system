@@ -302,7 +302,9 @@
                             <button type="submit" class="btn btn-outline-danger">Оплата не надійшла</button>
                         }
                     }
-                    if (s == OrderStatus.New || s == OrderStatus.Cancelled || s == OrderStatus.BidLost)
+                    @* Заявку зі ставками не видаляємо: інакше аукціон зник би з історії аукціонів *@
+                    if ((s == OrderStatus.New || s == OrderStatus.Cancelled || s == OrderStatus.BidLost) &&
+                        (Model.Bids == null || !Model.Bids.Any()))
                     {
                         @Html.ActionLink("Видалити заявку", "Delete", new { id = Model.OrderId }, new { @class = "btn btn-outline-danger" })
                     }
