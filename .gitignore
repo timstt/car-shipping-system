@@ -7,5 +7,6 @@ packages/
 App_Data/*.mdf
 App_Data/*.ldf
 *.pdf
+!docs/**/*.pdf
 docs/diagram-changes.md
 docs/lab3-report.md
