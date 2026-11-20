@@ -148,6 +148,7 @@ CSS/                         Web project (ASTCUSA.csproj)
 
 The project is planned and tracked in **Jira** and documented in **Confluence**.
 - Full Confluence export (PDF): [CSS-Confluence-export.pdf](docs/confluence/CSS-Confluence-export.pdf)
+- Project documents by topic (charter, WBS, RACI, risks, UAT and others): see the [documentation index](docs/README.md)
 
 ### Jira
 

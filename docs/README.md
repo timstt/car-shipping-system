@@ -1,0 +1,63 @@
+# Документація проєкту
+
+Документи проєкту Car Shipping System. Повний експорт Confluence: [CSS-Confluence-export.pdf](confluence/CSS-Confluence-export.pdf). Той самий експорт розкладено за документами у `confluence/parts/`; нові документи лежать тут як Markdown.
+
+Правило для репозиторію: не комітити ключі, паролі та реальні дані. Тестові акаунти з README створює сідер і не збігаються з реальними.
+
+## Планування й управління
+
+| Документ | Файл |
+|---|---|
+| Project Charter | [01-project-charter.pdf](confluence/parts/01-project-charter.pdf) |
+| DoR / DoD | [02-dor-dod.pdf](confluence/parts/02-dor-dod.pdf) |
+| Планування проєкту | [03-project-planning.pdf](confluence/parts/03-project-planning.pdf) |
+| WBS | [04-wbs.pdf](confluence/parts/04-wbs.pdf) |
+| OBS | [05-obs.pdf](confluence/parts/05-obs.pdf) |
+| Гант | [06-gantt.pdf](confluence/parts/06-gantt.pdf) |
+| RACI | [07-raci-matrix.pdf](confluence/parts/07-raci-matrix.pdf) |
+| Реєстр ризиків | [08-risk-register.pdf](confluence/parts/08-risk-register.pdf) |
+| Реєстр стейкхолдерів | [09-stakeholder-register.pdf](confluence/parts/09-stakeholder-register.pdf) |
+| План комунікацій | [10-communication-plan.pdf](confluence/parts/10-communication-plan.pdf) |
+| Журнал змін | [11-change-log.pdf](confluence/parts/11-change-log.pdf) |
+| Порівняння ролей | [role-comparison.md](role-comparison.md) |
+| Бюджет | [budget.md](budget.md) (вихідна оцінка: [комерційна пропозиція](confluence/parts/22-commercial-proposal-and-budget.pdf)) |
+| Пріоритизація беклогу | [23-backlog-prioritization.pdf](confluence/parts/23-backlog-prioritization.pdf) |
+
+## Вимоги й проєктування
+
+| Документ | Файл |
+|---|---|
+| Огляд вимог | [13-requirements.pdf](confluence/parts/13-requirements.pdf) |
+| ТЗ (SRS, FR-01…FR-26) | [14-srs-technical-specification.pdf](confluence/parts/14-srs-technical-specification.pdf) |
+| PRD | [15-prd.pdf](confluence/parts/15-prd.pdf) |
+| UML-діаграми | [16-uml-diagrams.pdf](confluence/parts/16-uml-diagrams.pdf), зображення в [diagrams/](diagrams) |
+| Глосарій | [17-glossary.pdf](confluence/parts/17-glossary.pdf) |
+| Таблиця контрактів | [api-contracts.md](api-contracts.md) |
+| Схема БД і сід | [database/create_and_seed.sql](database/create_and_seed.sql) |
+
+## Зустрічі й виконання
+
+| Документ | Файл |
+|---|---|
+| Kickoff-протокол | [19-kickoff-meeting.pdf](confluence/parts/19-kickoff-meeting.pdf) |
+| Нотатки зустрічі 08.10.2026 | [18-meeting-notes-2026-10-08.pdf](confluence/parts/18-meeting-notes-2026-10-08.pdf) |
+| Щоденні стендапи Sprint 1 | [21-sprint-1-daily.pdf](confluence/parts/21-sprint-1-daily.pdf) |
+| Статус розробки (Jira) | [20-development-status.pdf](confluence/parts/20-development-status.pdf), скріншоти в [images/](images) |
+| Status report | [status-report.md](status-report.md) |
+
+## Тестування, реліз, закриття
+
+| Документ | Файл |
+|---|---|
+| UAT-чекліст | [24-uat-checklist.pdf](confluence/parts/24-uat-checklist.pdf) |
+| Баги (зразки баг-репортів) | [25-bug-report-samples.pdf](confluence/parts/25-bug-report-samples.pdf) |
+| Release Notes | [release-notes.md](release-notes.md) |
+| Акт приймання | [acceptance-act.md](acceptance-act.md) (шаблон) |
+| Post-mortem (навчальний) | [12-post-mortem-v1.0-mvp.pdf](confluence/parts/12-post-mortem-v1.0-mvp.pdf) |
+| Lessons learned | [lessons-learned.md](lessons-learned.md) |
+
+## Що ще не заповнено
+
+- Реальний журнал багів: у репозиторії лише зразки баг-репортів.
+- Status report, Release Notes, акт приймання та Lessons learned: структура готова, фактичні дані додаються під час спринтів.
+- Експорт Confluence відображає стан сторінок на 27.10.2026 (остання дата змін у ньому); пізніші правки в нього не потрапили.
