@@ -107,12 +107,11 @@
 
 VIN унікальний (міграція `AddConcurrencyTokensAndUniqueVin`).
 
-## 4. Звіти й аналітика
+## 4. Звіти, профіль і вхід
 
 | Контролер | Роль | Призначення |
 |---|---|---|
 | `ReportsController` | Менеджер | Звіти по угодах, експорт |
-| `AnalyticsController` (частини Cars, Invoices, Orders, Users, Deliveries, Tables, Parallel) | Менеджер | Аналітична БД, таблиці, CRUD для довідників |
 | `ProfileController` | Клієнт | Профіль користувача |
 | `AccountController` | гість (`[AllowAnonymous]`) | Вхід, реєстрація, Forms Authentication |
 
