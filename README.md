@@ -6,6 +6,24 @@ The user interface is in Ukrainian.
 
 > The app is not connected to external auction, payment or shipping services. The manager bids on the auction site (Copart, IAAI, Manheim) and records the bid in the app: lot number, lot link, amount and result. Paying an invoice marks it as paid, and a photo report is a text note.
 
+## Highlights
+
+- **Full business workflow for three roles**: 12 order statuses and 8 car statuses, with the rules for each transition kept in the domain model (`CSS/Models`), not in the views.
+- **Auction bidding**: bids within the client's budget, each new bid higher than the last one including the other bidder's, results won / lost / outbid, and a history of all bids.
+- **Data integrity**: one `SaveChanges` (one transaction) per action, unique indexes, and `RowVersion` checks so two users cannot overwrite each other or order the same car.
+- **Security**: PBKDF2 password hashes, role-based access on every action, anti-forgery tokens on all POST forms, uploaded files checked by their content (a renamed HTML file is not accepted as a PDF).
+- **Reporting**: orders for a date range with totals by status, exported to CSV for Excel.
+- **Unit tests** for the auction rules and file upload checks (`CSS.Tests`, MSTest).
+- **Project management**: planned in Jira, documented in Confluence (charter, WBS, risks, SRS, UAT, release notes), with UML diagrams that match the code.
+
+## Screenshots
+
+| | |
+|---|---|
+| ![Car catalog](docs/images/app-catalog.png) Car catalog with filters (client) | ![Order with bid history](docs/images/app-order-bids.png) Order with its auction bids (client) |
+| ![Orders](docs/images/app-manager-orders.png) All orders by status (manager) | ![Auction history](docs/images/app-auction-history.png) Auction history with results (manager) |
+| ![Delivery tracking](docs/images/app-track-delivery.png) Delivery tracking (client) | ![Report](docs/images/app-report.png) Report for a period with CSV export (manager) |
+
 ## Features by role
 
 Access is controlled by role. All pages except the home page, login and registration require signing in.
@@ -85,6 +103,10 @@ Requirements: Visual Studio with the **ASP.NET and web development** workload (i
 
 The connection string is in `CSS/Web.config`. The database is created and filled with test data on the first start.
 
+### Unit tests
+
+`CSS.Tests` (MSTest) checks the domain rules without a database: placing bids within the budget, outbid and won results, lot link validation, uploaded file type checks and phone number format. Run them in Visual Studio from **Test → Run All Tests** (Test Explorer).
+
 ## Test accounts
 
 Seeded by `CSS/Models/ImportInitializer.cs`:
@@ -102,9 +124,10 @@ Six cars are also seeded (Toyota Camry, Honda Civic, Ford Mustang, Tesla Model 3
 
 ```
 CSS.slnx                     Solution file
+CSS.Tests/                   Unit tests of the domain model (MSTest)
 docs/
 ├── diagrams/                UML diagrams (see below)
-├── images/                  Jira screenshots
+├── images/                  App and Jira screenshots
 └── confluence/              Confluence export (PDF)
 CSS/                         Web project (ASTCUSA.csproj)
 ├── App_Start/               Bundles, global filters ([Authorize]), routes
