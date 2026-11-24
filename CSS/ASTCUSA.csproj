@@ -133,22 +133,6 @@
     <Compile Include="Controllers\OrdersController.cs" />
     <Compile Include="Controllers\ReportsController.cs" />
     <Compile Include="Controllers\ProfileController.cs" />
-    <Compile Include="Controllers\AnalyticsController.cs" />
-    <Compile Include="Controllers\AnalyticsController.Tables.cs" />
-    <Compile Include="Controllers\AnalyticsController.Users.cs" />
-    <Compile Include="Controllers\AnalyticsController.CarsTable.cs" />
-    <Compile Include="Controllers\AnalyticsController.Orders.cs" />
-    <Compile Include="Controllers\AnalyticsController.Invoices.cs" />
-    <Compile Include="Controllers\AnalyticsController.DeliveriesTable.cs" />
-    <Compile Include="Controllers\AnalyticsController.Parallel.cs" />
-    <Compile Include="Models\Analytics\AnalyticsContext.cs" />
-    <Compile Include="Models\Analytics\AnalyticsDatabase.cs" />
-    <Compile Include="Models\Analytics\AnalyticsEntities.cs" />
-    <Compile Include="Models\Analytics\AnalyticsQueries.cs" />
-    <Compile Include="Models\Analytics\AnalyticsTableModels.cs" />
-    <Compile Include="Models\Analytics\AnalyticsViewModels.cs" />
-    <Compile Include="Models\Analytics\ParallelUsersQuery.cs" />
-    <Compile Include="Models\Analytics\UsersGenerator.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\AuthTicket.cs" />
     <Compile Include="Models\Car.cs" />
@@ -272,26 +256,6 @@
     <Content Include="Views\Orders\_BidFields.cshtml" />
     <Content Include="Views\Orders\TrackDelivery.cshtml" />
     <Content Include="Views\Reports\Index.cshtml" />
-    <Content Include="Views\Analytics\_AnalyticsNav.cshtml" />
-    <Content Include="Views\Analytics\_InsuranceFields.cshtml" />
-    <Content Include="Views\Analytics\Cars.cshtml" />
-    <Content Include="Views\Analytics\ClientOrders.cshtml" />
-    <Content Include="Views\Analytics\PaidInvoices.cshtml" />
-    <Content Include="Views\Analytics\Deliveries.cshtml" />
-    <Content Include="Views\Analytics\Stats.cshtml" />
-    <Content Include="Views\Analytics\Insurances.cshtml" />
-    <Content Include="Views\Analytics\EditInsurance.cshtml" />
-    <Content Include="Views\Analytics\UsersTable.cshtml" />
-    <Content Include="Views\Analytics\UserForm.cshtml" />
-    <Content Include="Views\Analytics\CarsTable.cshtml" />
-    <Content Include="Views\Analytics\CarForm.cshtml" />
-    <Content Include="Views\Analytics\OrdersTable.cshtml" />
-    <Content Include="Views\Analytics\OrderForm.cshtml" />
-    <Content Include="Views\Analytics\InvoicesTable.cshtml" />
-    <Content Include="Views\Analytics\InvoiceForm.cshtml" />
-    <Content Include="Views\Analytics\DeliveriesTable.cshtml" />
-    <Content Include="Views\Analytics\DeliveryForm.cshtml" />
-    <Content Include="Views\Analytics\Parallel.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202611031507164_InitialCreate.resx">
@@ -308,13 +272,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202611121059464_AddCompetitorBids.resx">
       <DependentUpon>202611121059464_AddCompetitorBids.cs</DependentUpon>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <!-- SQL-скрипт створення бази astcusa_analytics вбудовано в збірку, AnalyticsDatabase виконує його під час першого запуску -->
-    <EmbeddedResource Include="..\docs\database\create_and_seed.sql">
-      <Link>Analytics\create_and_seed.sql</Link>
-      <LogicalName>ASTCUSA.Analytics.create_and_seed.sql</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

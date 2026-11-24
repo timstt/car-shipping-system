@@ -14,8 +14,7 @@ namespace ASTCUSA
                         "~/Scripts/jquery.validate*",
                         "~/Scripts/validation-messages.uk.js"));
 
-            // Повна версія Modernizr для розробки. Для робочої версії можна зібрати
-            // лише потрібні тести на https://modernizr.com
+            // Modernizr: перевірка підтримки можливостей браузера
             bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
                         "~/Scripts/modernizr-*"));
 
