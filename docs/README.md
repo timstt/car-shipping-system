@@ -17,10 +17,11 @@
 | RACI | [07-raci-matrix.pdf](confluence/parts/07-raci-matrix.pdf) |
 | Реєстр ризиків | [08-risk-register.pdf](confluence/parts/08-risk-register.pdf) |
 | Реєстр стейкхолдерів | [09-stakeholder-register.pdf](confluence/parts/09-stakeholder-register.pdf) |
+| Карта стейкхолдерів (Power/Interest) | [29-stakeholder-map.pdf](confluence/parts/29-stakeholder-map.pdf) |
 | План комунікацій | [10-communication-plan.pdf](confluence/parts/10-communication-plan.pdf) |
 | Журнал змін | [11-change-log.pdf](confluence/parts/11-change-log.pdf) |
 | Порівняння ролей | [role-comparison.md](role-comparison.md) |
-| Бюджет | [budget.md](budget.md) (вихідна оцінка: [комерційна пропозиція](confluence/parts/22-commercial-proposal-and-budget.pdf)) |
+| Бюджет і EVM | [27-budget-and-evm.pdf](confluence/parts/27-budget-and-evm.pdf), [budget.md](budget.md) (вихідна оцінка: [комерційна пропозиція](confluence/parts/22-commercial-proposal-and-budget.pdf)) |
 | Пріоритизація беклогу | [23-backlog-prioritization.pdf](confluence/parts/23-backlog-prioritization.pdf) |
 
 ## Вимоги й проєктування
@@ -28,12 +29,11 @@
 | Документ | Файл |
 |---|---|
 | Огляд вимог | [13-requirements.pdf](confluence/parts/13-requirements.pdf) |
-| ТЗ (SRS, FR-01…FR-26) | [14-srs-technical-specification.pdf](confluence/parts/14-srs-technical-specification.pdf) |
+| ТЗ (SRS 1.4, FR-01…FR-34) | [14-srs-technical-specification.pdf](confluence/parts/14-srs-technical-specification.pdf) |
 | PRD | [15-prd.pdf](confluence/parts/15-prd.pdf) |
 | UML-діаграми | [16-uml-diagrams.pdf](confluence/parts/16-uml-diagrams.pdf), зображення в [diagrams/](diagrams) |
 | Глосарій | [17-glossary.pdf](confluence/parts/17-glossary.pdf) |
 | Таблиця контрактів | [api-contracts.md](api-contracts.md) |
-| Схема БД і сід | [database/create_and_seed.sql](database/create_and_seed.sql) |
 
 ## Зустрічі й виконання
 
@@ -43,7 +43,7 @@
 | Нотатки зустрічі 08.10.2026 | [18-meeting-notes-2026-10-08.pdf](confluence/parts/18-meeting-notes-2026-10-08.pdf) |
 | Щоденні стендапи Sprint 1 | [21-sprint-1-daily.pdf](confluence/parts/21-sprint-1-daily.pdf) |
 | Статус розробки (Jira) | [20-development-status.pdf](confluence/parts/20-development-status.pdf), скріншоти в [images/](images) |
-| Status report | [status-report.md](status-report.md) |
+| Status report | [28-status-report-2026-11-16.pdf](confluence/parts/28-status-report-2026-11-16.pdf), [status-report.md](status-report.md) |
 
 ## Тестування, реліз, закриття
 
@@ -51,13 +51,16 @@
 |---|---|
 | UAT-чекліст | [24-uat-checklist.pdf](confluence/parts/24-uat-checklist.pdf) |
 | Баги (зразки баг-репортів) | [25-bug-report-samples.pdf](confluence/parts/25-bug-report-samples.pdf) |
-| Release Notes | [release-notes.md](release-notes.md) |
-| Акт приймання | [acceptance-act.md](acceptance-act.md) (шаблон) |
+| Release Notes і тріаж багів | [34-release-notes-and-bug-triage.pdf](confluence/parts/34-release-notes-and-bug-triage.pdf), [release-notes.md](release-notes.md) |
+| Акт приймання | [31-acceptance-act-v1.0-mvp.pdf](confluence/parts/31-acceptance-act-v1.0-mvp.pdf), [acceptance-act.md](acceptance-act.md) (шаблон) |
+| Чекліст передачі в підтримку | [32-support-handover-checklist.pdf](confluence/parts/32-support-handover-checklist.pdf) |
+| Підтримка після запуску: рівні і SLA | [30-post-launch-support-sla.pdf](confluence/parts/30-post-launch-support-sla.pdf) |
 | Post-mortem (навчальний) | [12-post-mortem-v1.0-mvp.pdf](confluence/parts/12-post-mortem-v1.0-mvp.pdf) |
-| Lessons learned | [lessons-learned.md](lessons-learned.md) |
+| Фінальна ретроспектива | [26-final-retrospective-v1.0-mvp.pdf](confluence/parts/26-final-retrospective-v1.0-mvp.pdf) |
+| Lessons learned | [33-lessons-learned.pdf](confluence/parts/33-lessons-learned.pdf), [lessons-learned.md](lessons-learned.md) |
 
 ## Що ще не заповнено
 
 - Реальний журнал багів: у репозиторії лише зразки баг-репортів.
 - Status report, Release Notes, акт приймання та Lessons learned: структура готова, фактичні дані додаються під час спринтів.
-- Експорт Confluence відображає стан сторінок на 27.10.2026 (остання дата змін у ньому); пізніші правки в нього не потрапили.
+- Експорт Confluence відображає стан сторінок на 24.11.2026.
