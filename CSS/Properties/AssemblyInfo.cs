@@ -3,11 +3,11 @@ using System.Runtime.InteropServices;
 
 // Загальні відомості про збірку задаються такими атрибутами.
 [assembly: AssemblyTitle("ASTCUSA")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Система перевезення авто з аукціонів США (ASP.NET MVC 5, EF6)")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Стукало Т.О., ІПЗ-21")]
 [assembly: AssemblyProduct("ASTCUSA")]
-[assembly: AssemblyCopyright("© , 2026")]
+[assembly: AssemblyCopyright("© Стукало Т.О., 2026")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
