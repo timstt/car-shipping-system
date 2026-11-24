@@ -4,7 +4,7 @@ A web application for ordering cars from US auctions and shipping them to the cl
 
 The user interface is in Ukrainian.
 
-> The auction, payments and photo reports are simulated inside the app: a bid wins if it is at least the car's auction price, paying an invoice marks it as paid, and a photo report is a text note. There is no integration with external auction, payment or shipping services.
+> The app is not connected to external auction, payment or shipping services. The manager bids on the auction site (Copart, IAAI, Manheim) and records the bid in the app: lot number, lot link, amount and result. Paying an invoice marks it as paid, and a photo report is a text note.
 
 ## Features by role
 
@@ -19,7 +19,8 @@ Access is controlled by role. All pages except the home page, login and registra
 - Create an order for a car with a maximum budget.
 - Edit the order (change the budget or pick another car) while it is *New*, *Documents requested*, *Documents provided* or *Bid lost*. Editing a *Bid lost* order sends it back to the manager as *New*.
 - Cancel an order (not possible after the bid has been won).
-- Provide documents when the manager requests them.
+- Provide documents when the manager requests them: attach up to 10 files (PDF, JPG, PNG, up to 5 MB each). The file type is checked by its content, not only by its extension.
+- See the auction history of their orders: every bid with the auction, lot link, amount, result and the other bidder's amount when the bid was outbid or lost.
 - Add an insurance package (type and price) to an order, change or remove it until the order is paid.
 - Pay an invoice.
 - Track delivery: tracking number, current location, delivery status and customs status.
@@ -32,12 +33,18 @@ Access is controlled by role. All pages except the home page, login and registra
 - See all orders, filter them by status.
 - Take an order into work.
 - Request additional documents from the client.
-- Place a bid at the auction. If the car's price exceeds the client's budget, or the bid is lost, the order becomes *Bid lost* and the client is notified.
+- Request additional documents again if the provided ones do not fit, and open the attached files.
+- Take part in the auction. If the car's price exceeds the client's budget, the order becomes *Bid lost* and the client is notified. Otherwise the manager records the bid (auction, lot number, lot link, amount, within the client's budget) and the car becomes *Auction*.
+- Set the bid result:
+  - *Outbid*: the other bidder's amount is recorded, the car is *Available* again and the manager can place a higher bid;
+  - *Won*: the car becomes *Reserved*, the order *Bid won*, and the client is notified;
+  - *Lost*: the car becomes *Sold to other*, the order *Bid lost*, and the client is notified.
+- Edit or remove a bid while it is waiting for the result. Bids with a result stay in the history.
+- See the auction history of all orders, filtered by result, with the number and total of won bids.
 - Create an invoice after a won bid (amount = winning bid); the client is notified.
 - Confirm or reject the client's payment. Rejection returns the invoice to unpaid and notifies the client; confirmation marks the order and the car as *Paid* and passes the order to logistics.
-- Delete orders that are *New*, *Cancelled* or *Bid lost*.
+- Delete orders that are *New*, *Cancelled* or *Bid lost* and have no auction bids.
 - Build a report for a date range (orders, counts by status, number and total of paid orders) and export it as a CSV file that opens in Excel.
-- Open the **Analytics** section: searches and statistics over a separate database (see [Analytics database](#analytics-database)).
 
 ### Logistician
 
@@ -56,7 +63,7 @@ Access is controlled by role. All pages except the home page, login and registra
 | Framework | ASP.NET MVC 5 (5.2.9), Razor views |
 | Runtime | .NET Framework 4.7.2 |
 | Data access | Entity Framework 6 (6.5.1), Code First |
-| Database | SQL Server LocalDB (`(localdb)\MSSQLLocalDB`): database `astcusa` (EF Code First) and a second relational database for analytics |
+| Database | SQL Server LocalDB (`(localdb)\MSSQLLocalDB`): database `astcusa` (EF Code First) |
 | UI | Bootstrap 5.2.3, jQuery, jQuery Validation |
 | Authentication | Forms Authentication cookie; passwords stored as PBKDF2 hashes |
 
@@ -68,28 +75,6 @@ The database schema is managed by **EF6 Code First Migrations** (`CSS/Migrations
 - Unique indexes on user e-mail, car VIN and invoice order; foreign keys; validation attributes on the models.
 - `Car` and `Order` have a `RowVersion` concurrency token. Editing a car or an order that someone else changed after the form was opened is rejected with a message, and two clients cannot order the same car at the same time.
 
-## Analytics database
-
-Besides the main database used by the app (EF Code First), the project has a **separate relational database** designed after the UML class diagram and used by the manager's **Analytics** section.
-
-- **6 tables**: `Users`, `Cars`, `Orders`, `Insurances`, `Invoices`, `Deliveries`; 7 foreign keys, unique and check constraints, 12-26 seeded rows per table.
-- Created by an idempotent T-SQL script. The site runs it automatically on the first visit to the **Analytics** section if the database does not exist.
-- Accessed through a second `DbContext` with its own connection string in `CSS/Web.config`, independent from the main one.
-- The **Analytics** section is available to the Manager only. Its **query** tabs:
-  - **Cars** — filter by make, year range and price.
-  - **Client orders** — orders of a client by e-mail and status.
-  - **Payments for a period** — sum and count of paid invoices for a chosen day, month or half-year.
-  - **Deliveries** — by delivery status and customs state.
-  - **Grouping** — order count and car prices grouped by order status or car make.
-  - **Parallelism** — runs one query on the `Users` table (Kyivstar clients with a valid Latin e-mail) sequentially and in parallel: PLINQ on a chosen number of cores, manual `Thread`s and TPL `Parallel.ForEach`, with average time and speed-up for each. Buttons fill `Users` up to 100 000 rows with generated clients (`SqlBulkCopy`, e-mails `@gen.test`) and remove them again. Generated clients are left out of the client drop-downs, and the `Users` table page shows the first 200 rows.
-- **Table management** tabs: add, edit and delete records in every table — `Users`, `Cars`, `Orders`, `Insurances`, `Invoices`, `Deliveries`.
-  - Forms check the same rules as the database: unique e-mail / VIN / tracking number, one invoice and one delivery per order, client / manager / logistician chosen by role, a paid invoice must have a payment date.
-  - A record that other records depend on cannot be deleted: a user or car linked to orders, or an order that has insurances, an invoice or a delivery. The page says which records block the deletion.
-  - Finished records are locked: a paid invoice cannot be deleted, un-paid, moved to another order or have its amount changed; a paid or completed order cannot be deleted, and a completed order cannot be edited.
-  - Delivery status is one of five stages that only move forward: «Очікує перевізника» → «Перевізника призначено» → «В дорозі» → «Готово до видачі» → «Доставлено». A new delivery starts at «Очікує перевізника»; assigning a carrier requires a logistician; «В дорозі» and later require customs clearance, which cannot be undone; the tracking number is fixed once the car is on its way. Only a delivery still waiting for a carrier (customs not cleared, order not completed) can be deleted.
-  - A delivery can be created only for a paid order (status Paid, Shipping or Completed), and an order that has a delivery or a paid invoice cannot go back to an unpaid status.
-  - Insurances of a paid or completed order cannot be added, changed, moved or deleted.
-
 ## Getting started
 
 Requirements: Visual Studio with the **ASP.NET and web development** workload (includes IIS Express and SQL Server LocalDB) and the .NET Framework 4.7.2 targeting pack.
@@ -98,7 +83,7 @@ Requirements: Visual Studio with the **ASP.NET and web development** workload (i
 2. Press **F5**. NuGet packages are restored on build.
 3. The site opens at **https://localhost:44392**.
 
-The connection strings are in `CSS/Web.config`. The second database is created automatically on the first visit to the **Analytics** section (sign in as the manager).
+The connection string is in `CSS/Web.config`. The database is created and filled with test data on the first start.
 
 ## Test accounts
 
@@ -117,7 +102,10 @@ Six cars are also seeded (Toyota Camry, Honda Civic, Ford Mustang, Tesla Model 3
 
 ```
 CSS.slnx                     Solution file
-docs/diagrams/               UML diagrams (see below)
+docs/
+├── diagrams/                UML diagrams (see below)
+├── images/                  Jira screenshots
+└── confluence/              Confluence export (PDF)
 CSS/                         Web project (ASTCUSA.csproj)
 ├── App_Start/               Bundles, global filters ([Authorize]), routes
 ├── Controllers/
@@ -125,7 +113,7 @@ CSS/                         Web project (ASTCUSA.csproj)
 │   ├── AccountController.cs Login, registration, logout
 │   ├── HomeController.cs    Home page / role dashboard
 │   ├── CarsController.cs    Catalog, search, favorites, car CRUD
-│   ├── OrdersController.cs  Order workflow for all three roles
+│   ├── OrdersController.cs  Order workflow for all three roles, auction bids and history
 │   ├── ProfileController.cs Client profile: view, edit, delete
 │   └── ReportsController.cs Reports and CSV export
 ├── Migrations/              EF6 Code First migrations and their configuration
@@ -133,6 +121,9 @@ CSS/                         Web project (ASTCUSA.csproj)
 │   ├── User.cs              Abstract User + Client, Manager, Logistician (TPH)
 │   ├── Car.cs, CarCatalog.cs
 │   ├── Order.cs, Insurance.cs, Invoice.cs (IPayable), Delivery.cs
+│   ├── AuctionBid.cs        Auction bid (lot, link, amount, result) and BidResult
+│   ├── OrderDocument.cs     Files attached to an order, type checked by signature
+│   ├── PhoneNumbers.cs      Ukrainian phone number check and format
 │   ├── OrderReport.cs       Report data and CSV generation
 │   ├── Enums.cs             CarStatus, OrderStatus, UserRole
 │   ├── ImportContext.cs     EF DbContext
@@ -173,8 +164,6 @@ Each PNG contains the diagram source, so it opens for editing in draw.io (diagra
 ### Use case diagram
 
 ![Use case diagram](docs/diagrams/OOPfirst.drawio.png)
-
-> The diagram mentions exporting the report to PDF / Excel; the implementation exports CSV, which opens in Excel, and the report page can be printed or saved as PDF from the browser.
 
 ### Class diagram
 
